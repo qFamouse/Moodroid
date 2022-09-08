@@ -2,13 +2,13 @@ export function squeezeText(text: string) : string {
 
   if (!text) return text;
 
-  let optimText: string = text;
+  let squeezedText: string = text;
 
   // remove whitespaces
-  optimText = optimText.replace(/\s+/g, "");
+  squeezedText = squeezedText.replace(/\s+/g, "");
 
   // lowercase
-  optimText = optimText.toLowerCase();
+  squeezedText = squeezedText.toLowerCase();
 
-  return optimText;
+  return squeezedText;
 }
