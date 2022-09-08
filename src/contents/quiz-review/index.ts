@@ -1,25 +1,9 @@
 import type { PlasmoContentScript } from "plasmo"
+import { Question, QuestionType } from "~models/question";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/review.php*"]
 }
-
-enum QuestionType {
-    multichoice = "multichoice", // radio & checkbox
-    match       = "match",       // select
-
-    shortanswer = "shortanswer", // small input
-    multianswer = "multianswer", // in practice, I have not met. Has been founded in the source files. When applied, this class slightly increases the 'shortanswer'
-    rightanswer = "rightanswer", // in practice, I have not met. Has been founded in the source files. When applied, this class slightly increases the 'shortanswer'
-    essay       = "essay",       // textarea
-
-}
-
-declare type Question = {
-    text: string,
-    type: QuestionType,
-    answers: string[]
-};
 
 window.addEventListener("load", () => {
     // let que = document.getElementsByClassName('que complete correct')
