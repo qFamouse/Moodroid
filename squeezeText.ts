@@ -1,4 +1,4 @@
-export function optim(text: string) : string {
+export function squeezeText(text: string) : string {
 
   if (!text) return text;
 
