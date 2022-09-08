@@ -40,18 +40,6 @@ window.addEventListener("load", () => {
             console.log(question);
         }
     })
-
-
-    // que[0].classList.forEach(curClass => {
-    //     if (curClass in QuestionType) {
-    //         console.log('is ', curClass);
-    //
-    //     }
-    // });
-    //
-    // let answer = que[0].querySelector(".answer");
-    //
-    // console.log(getAnswers(answer, QuestionType.multichoice));
 })
 
 function getCorrectAnswers(que : Element, type : QuestionType) : string[] {
