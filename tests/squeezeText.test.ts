@@ -1,9 +1,9 @@
-import { optim } from "~textoptim";
+import { squeezeText } from "~squeezeText";
 
 test("should return null", () => {
   let expected: string = null;
 
-  let actual: string = optim(null);
+  let actual: string = squeezeText(null);
 
   expect(actual).toBe(expected);
 });
@@ -12,7 +12,7 @@ test("should remove whitespaces and lowercase", () => {
   let text: string = "  Simple text.  ";
   let expected: string = "simpletext.";
 
-  let actual: string = optim(text);
+  let actual: string = squeezeText(text);
 
   expect(actual).toBe(expected);
 });
