@@ -61,7 +61,7 @@ function getCorrectAnswers(que : Element, type : QuestionType) : string[] {
             break;
 
         case QuestionType.match:
-            que.querySelectorAll(".answer>[class^=r]").forEach(r => {
+            que.querySelectorAll(".answer>tbody>[class^=r]").forEach(r => {
                 answers.push(r.querySelector(".text").textContent); // text
                 answers.push(r.querySelector("option:checked").textContent) // control
             });
