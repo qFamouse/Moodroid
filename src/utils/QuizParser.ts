@@ -17,7 +17,7 @@ export class QuizParser {
         return que.querySelector('.qtext').textContent;
     }
 
-    public static getQuestionResponses(que : Element) : NodeListOf<Element> {
+    public static getQuestionRows(que : Element) : NodeListOf<Element> {
         return que.querySelectorAll(".answer>[class^=r],.answer>input,.answer>textarea");
     }
 }
