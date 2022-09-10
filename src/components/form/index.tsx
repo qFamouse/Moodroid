@@ -2,20 +2,20 @@ import styles from "./form.module.css";
 import { useCallback, useState } from "react";
 import { readDatabase, readDatabasePromise } from "~utils/readDatabase";
 import { StatusBar } from "~components/statusbar";
+import { ToggleSwitch } from "~components/toggle";
 
 export function Form() {
-  const [isCheats, setIsCheats] = useState("");   
-  const [isResponseCollection, setIsResponseCollection] = useState("");  
+  const [isCheats, setIsCheats] = useState(false);   
+  const [isResponseCollection, setIsResponseCollection] = useState(false);  
   const [statusMessage, setStatusMessage] = useState(""); 
 
-  
   const setIsCheatsHandler = useCallback((event) => {
     setIsCheats(event.target.checked);
-  }, []);
+  }, [isCheats]);
 
   const setisResponseCollectionHandler = useCallback((event) => {
     setIsResponseCollection(event.target.checked);
-  }, []);
+  }, [isResponseCollection]);
 
   const setStatusMessageHandler = useCallback((text: string) => {
     setStatusMessage(text);
@@ -39,23 +39,8 @@ export function Form() {
     <div className={styles.form}>
 
       <div className={styles.optionHolder}>
-
-        <div className={styles.toggle}>
-          <label htmlFor="cheatsOption">Cheats:</label>
-          <label className={styles.switch}>
-            <input type="checkbox" id="cheatsOption" onChange={setIsCheatsHandler}/>
-            <span className={styles.slider}></span>
-          </label>
-        </div>
-
-        <div className={styles.toggle}>
-          <label htmlFor="responsesOption" style={{flexBasis: 0}}>Collect Responses:</label>
-          <label className={styles.switch}>
-            <input type="checkbox" id="responsesOption" onChange={setisResponseCollectionHandler}/>
-            <span className={styles.slider}></span>
-          </label>
-        </div>
-
+        <ToggleSwitch label={'Cheats'} changeValue={setIsCheatsHandler}/>
+        <ToggleSwitch label={'Collect Responses'} changeValue={setisResponseCollectionHandler}/>
       </div>
 
       <label className={styles.button}>
