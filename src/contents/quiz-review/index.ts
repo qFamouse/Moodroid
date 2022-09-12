@@ -1,5 +1,5 @@
 import type {PlasmoContentScript} from "plasmo"
-import {Question, QuestionType} from "~models/Question";
+import {Question, QuestionType} from "~models/types/Question";
 import {QuizParser} from "~models/QuizParser";
 
 export const config: PlasmoContentScript = {

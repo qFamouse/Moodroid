@@ -1,7 +1,7 @@
 import type {PlasmoContentScript} from "plasmo"
 import {QuizParser} from "~utils/QuizParser";
 import {squeezeText} from "~utils/squeezeText";
-import {Question, QuestionType} from "~models/Question";
+import {Question, QuestionType} from "~models/types/Question";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/attempt.php*"]
