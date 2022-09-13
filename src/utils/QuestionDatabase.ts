@@ -10,6 +10,8 @@ export enum Command {
   Export = "export",
   Add    = "add",
   Get    = "get",
+  Size   = "size",
+  Clear  = "clear",
 }
 
 export function reviver(key, value) {
@@ -17,12 +19,13 @@ export function reviver(key, value) {
     if (value.dataType === "Map") {
       return new Map(value.value);
     }
+  } else {
+    return value;
   }
-  return value;
 }
 
 export function replacer(key, value) {
-  if(value instanceof Map) {
+  if (value instanceof Map) {
     return {
       dataType: "Map",
       value: Array.from(value.entries()), // or with spread: value: [...value]
@@ -39,9 +42,6 @@ export class QuestionDatabase {
       if (response.status !== Status.Success) {
         throw new Error("Failed to import data to database.");
       }
-
-      // FIXME
-      console.log("Data imported.");
     });
   }
 
@@ -72,6 +72,25 @@ export class QuestionDatabase {
         }
         resolve(response.question);
       });
+    });
+  }
+
+  static size(): Promise<number> {
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage({command: Command.Size}, function(response) {
+        if (response.status !== Status.Success) {
+          throw new Error("Failed get database size.");
+        }
+        resolve(response.size);
+      });
+    });
+  }
+
+  static clear(): void {
+    chrome.runtime.sendMessage({command: Command.Clear}, function(response) {
+      if (response.status !== Status.Success) {
+        throw new Error("Failed to clear database.");
+      }
     });
   }
 }
