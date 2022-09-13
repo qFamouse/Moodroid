@@ -1,10 +1,10 @@
-import styles from "./form.module.css";
+import styles from "./popup-body.module.css";
 import { useCallback, useState } from "react";
 import { readDatabase, readDatabasePromise } from "~utils/readDatabase";
 import { StatusBar } from "~components/statusbar";
-import { ToggleSwitch } from "~components/toggle";
+import { ToggleButton } from "~components/toggle";
 
-export function Form() {
+export function PopupBody() {
   const [isCheats, setIsCheats] = useState(false);   
   const [isResponseCollection, setIsResponseCollection] = useState(false);  
   const [statusMessage, setStatusMessage] = useState(""); 
@@ -13,7 +13,7 @@ export function Form() {
     setIsCheats(event.target.checked);
   }, [isCheats]);
 
-  const setisResponseCollectionHandler = useCallback((event) => {
+  const setIsResponseCollectionHandler = useCallback((event) => {
     setIsResponseCollection(event.target.checked);
   }, [isResponseCollection]);
 
@@ -24,28 +24,34 @@ export function Form() {
   const readFileHandler = useCallback(async (event) => {
     console.log(event.target.files);
     setStatusMessageHandler("Loading Database...");
-    readDatabasePromise(event.target.files[0])
-    .then(text => {
+    try {
+      let text = await readDatabasePromise(event.target.files[0])
       setStatusMessageHandler("Database readed");
       console.log(text);
-    })
-    .catch(err => {
-        setStatusMessageHandler("Cannot read database");
-        console.log(err);
-    });
-  }, []);
+    }
+    catch(error) {
+      setStatusMessageHandler("Cannot read database");
+      console.log(error);
+    }
+  }, [statusMessage]);
 
   return (
-    <div className={styles.form}>
+    <div className={styles.popupBody}>
 
       <div className={styles.optionHolder}>
-        <ToggleSwitch label={'Cheats'} changeValue={setIsCheatsHandler}/>
-        <ToggleSwitch label={'Collect Responses'} changeValue={setisResponseCollectionHandler}/>
+        <ToggleButton 
+          label={'Cheats'} 
+          changeValue={setIsCheatsHandler}
+          value={isCheats}/>
+        <ToggleButton 
+          label={'Collect Responses'} 
+          changeValue={setIsResponseCollectionHandler}
+          value={isResponseCollection}/>
       </div>
 
       <label className={styles.button}>
         Load Database
-        <input id="fileUpload" type="file" hidden onChange={readFileHandler}/>
+        <input id="fileUpload" type="file" hidden onInput={readFileHandler}/>
       </label>
       <label className={styles.button}>
         Export Database

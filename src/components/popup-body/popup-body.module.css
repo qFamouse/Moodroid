@@ -2,7 +2,7 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.form {
+.popupBody {
     display: flex;
     flex-direction: column;
     padding: 4px 12px;
