@@ -47,7 +47,10 @@ export function Form() {
         Load Database
         <input id="fileUpload" type="file" hidden onChange={readFileHandler}/>
       </label>
-      <input type="button" value="Export Database" className={styles.button}/>
+      <label className={styles.button}>
+        Export Database
+        <input type="button" hidden/>
+      </label>
       
       <StatusBar message={statusMessage || "Nothing happening"}/>
     </div>  
