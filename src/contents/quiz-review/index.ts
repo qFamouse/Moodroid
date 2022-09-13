@@ -1,6 +1,6 @@
 import type {PlasmoContentScript} from "plasmo"
 import {Question, QuestionType} from "~models/types/Question";
-import {QuizParser} from "~models/QuizParser";
+import {QuizParser} from "~utils/QuizParser";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/review.php*"]
