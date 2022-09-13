@@ -66,7 +66,7 @@ export class QuestionDatabase {
 
   static get(key: string): Promise<Question> {
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage({command: Command.Get}, function(response) {
+      chrome.runtime.sendMessage({command: Command.Get, key: key}, function(response) {
         if (response.status != Status.Success) {
           throw new Error("Failed to get question from database.");
         }
