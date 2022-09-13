@@ -17,8 +17,9 @@ export function reviver(key, value) {
     if (value.dataType === "Map") {
       return new Map(value.value);
     }
+  } else {
+    return value;
   }
-  return value;
 }
 
 export function replacer(key, value) {
