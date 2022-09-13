@@ -23,7 +23,7 @@ export function reviver(key, value) {
 }
 
 export function replacer(key, value) {
-  if(value instanceof Map) {
+  if (value instanceof Map) {
     return {
       dataType: "Map",
       value: Array.from(value.entries()), // or with spread: value: [...value]
