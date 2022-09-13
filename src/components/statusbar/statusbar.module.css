@@ -1,0 +1,6 @@
+.statusbar {
+    border-top: 1px dotted rgb(139, 139, 139);
+    color: rgb(139, 139, 139);
+    text-align: center;
+    width: 100%;
+}
