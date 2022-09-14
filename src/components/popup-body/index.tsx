@@ -2,20 +2,11 @@ import styles from "./popup-body.module.css";
 import { useCallback, useState } from "react";
 import { readDatabase, readDatabasePromise } from "~utils/readDatabase";
 import { StatusBar } from "~components/statusbar";
-import { ToggleButton } from "~components/toggle";
+import ToggleButton from "~components/toggle-button";
 
 export function PopupBody() {
-  const [isCheats, setIsCheats] = useState(false);   
-  const [isResponseCollection, setIsResponseCollection] = useState(false);  
-  const [statusMessage, setStatusMessage] = useState(""); 
-
-  const setIsCheatsHandler = useCallback((event) => {
-    setIsCheats(event.target.checked);
-  }, [isCheats]);
-
-  const setIsResponseCollectionHandler = useCallback((event) => {
-    setIsResponseCollection(event.target.checked);
-  }, [isResponseCollection]);
+  const [isCheats, setIsCheats] = useState(true);
+  const [statusMessage, setStatusMessage] = useState("");
 
   const setStatusMessageHandler = useCallback((text: string) => {
     setStatusMessage(text);
@@ -39,14 +30,10 @@ export function PopupBody() {
     <div className={styles.popupBody}>
 
       <div className={styles.optionHolder}>
-        <ToggleButton 
-          label={'Cheats'} 
-          changeValue={setIsCheatsHandler}
-          value={isCheats}/>
-        <ToggleButton 
-          label={'Collect Responses'} 
-          changeValue={setIsResponseCollectionHandler}
-          value={isResponseCollection}/>
+        <ToggleButton
+            text={"Cheats"}
+            checked={isCheats}
+            onClick={(event) => setIsCheats(event.target.checked)}/>
       </div>
 
       <label className={styles.button}>
