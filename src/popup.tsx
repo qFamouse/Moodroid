@@ -1,10 +1,9 @@
-import { Form } from "~components/form";
+import { PopupBody } from "~components/popup-body";
 
 function IndexPopup() {
-
   return (
     <div>
-       <Form/>
+       <PopupBody/>
     </div>
   )
 
