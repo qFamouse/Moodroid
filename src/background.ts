@@ -55,6 +55,25 @@ const handleGet = function(request, sender, sendResponse) {
   }
 }
 
+/**
+ * Handle request: {command: Command.Size}
+ */
+const handleSize = function(request, sender, sendResponse) {
+  if (request.command === Command.Size) {
+    sendResponse({status: Status.Success, size: questions.size});
+  }
+}
+
+/**
+ * Handle request: {command: Command.Clear}
+ */
+const handleClear = function(request, sender, sendResponse) {
+  if (request.command === Command.Clear) {
+    questions.clear();
+    sendResponse({status: Status.Success});
+  }
+}
+
 // add listeners
 chrome.runtime.onMessage.addListener(handleImport);
 
@@ -63,3 +82,7 @@ chrome.runtime.onMessage.addListener(handleExport);
 chrome.runtime.onMessage.addListener(handleAdd);
 
 chrome.runtime.onMessage.addListener(handleGet);
+
+chrome.runtime.onMessage.addListener(handleSize);
+
+chrome.runtime.onMessage.addListener(handleClear);
