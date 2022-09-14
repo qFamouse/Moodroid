@@ -1,6 +1,8 @@
 import type {PlasmoContentScript} from "plasmo"
 import {Question, QuestionType} from "~models/Question";
 import {QuizParser} from "~utils/QuizParser";
+import {QuestionDatabase} from "~utils/QuestionDatabase";
+import {squeezeText} from "~utils/squeezeText";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/review.php*"]
@@ -37,7 +39,7 @@ window.addEventListener("load", () => {
                 answers: getCorrectAnswers(que, type)
             }
 
-            console.log(question);
+            QuestionDatabase.add(squeezeText(question.text), question);
         }
     })
 })
