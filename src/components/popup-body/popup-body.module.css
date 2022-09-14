@@ -1,13 +1,12 @@
-:root {
-    font-size: 14px;
-    font-weight: 600;
+:global(body) {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.form {
+.popupBody {
     display: flex;
     flex-direction: column;
     padding: 4px 12px;
-    gap: 10px
+    gap: 10px;
 }
 
 .optionHolder {
@@ -18,12 +17,14 @@
 
 .button {
     font-size: 16px;
+    font-weight: 500;
     padding: 4px 8px;
     background-color: #2196F3;
     color: white;
     border-radius: 5px;
     border: 0;
     text-align: center;
+    white-space: nowrap;
 }
 
 .button:hover {
