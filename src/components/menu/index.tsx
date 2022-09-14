@@ -1,4 +1,4 @@
-import styles from "./popup-body.module.css";
+import styles from "./menu.module.css";
 import { useState } from "react";
 import ToggleButton from "~components/toggle-button";
 import StatusBar from "~components/status-bar";
@@ -7,7 +7,7 @@ import {download} from "~utils/download";
 
 
 
-export function PopupBody() {
+export function Menu() {
     const [isCheats, setIsCheats] = useState(true);
     const [status, setStatus] = useState("Hello :)");
 
@@ -40,7 +40,7 @@ export function PopupBody() {
     }
 
   return (
-    <div className={styles.popupBody}>
+    <div className={styles.menu}>
         <div className={styles.optionHolder}>
             <ToggleButton
                 text={"Cheats"}
@@ -61,4 +61,4 @@ export function PopupBody() {
   )
 }
 
-export default PopupBody;
+export default Menu;

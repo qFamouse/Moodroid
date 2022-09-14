@@ -1,9 +1,9 @@
-import { PopupBody } from "~components/popup-body";
+import { Menu } from "~components/menu";
 
 function IndexPopup() {
   return (
     <div>
-       <PopupBody/>
+       <Menu/>
     </div>
   )
 
