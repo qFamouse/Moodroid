@@ -16,7 +16,15 @@ export function PopupBody() {
         if (file) {
             setStatus("Loading Database...");
             file.text().then(text => {
-                QuestionDatabase.import(text);
+                if (text) {
+                    try {
+                        QuestionDatabase.import(text);
+                        setStatus("Database is loaded")
+                    }
+                    catch (e) {
+                        setStatus(e.message)
+                    }
+                }
             })
         }
         else {
