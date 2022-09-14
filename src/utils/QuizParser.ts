@@ -1,4 +1,4 @@
-import {QuestionType} from "~models/types/Question";
+import {QuestionType} from "~models/Question";
 import {MatchElement} from "~models/MatchElement";
 
 
