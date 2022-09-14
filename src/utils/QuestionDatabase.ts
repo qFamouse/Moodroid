@@ -45,13 +45,13 @@ export class QuestionDatabase {
     });
   }
 
-  static export(): Promise<Map<string, Question>> {
+  static export(): Promise<string> {
     return new Promise((resolve) => {
       chrome.runtime.sendMessage({command: Command.Export}, function(response) {
         if (response.status !== Status.Success) {
           throw new Error("Failed to export data from database.");
         }
-        resolve(JSON.parse(response.text, reviver));
+        resolve(response.text);
       });
     });
   }
