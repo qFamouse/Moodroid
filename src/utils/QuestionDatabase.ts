@@ -1,18 +1,6 @@
 import type { Question } from "~models/Question";
-
-export enum Status {
-  Success = "success",
-  Failed  = "failed",
-}
-
-export enum Command {
-  Import = "import",
-  Export = "export",
-  Add    = "add",
-  Get    = "get",
-  Size   = "size",
-  Clear  = "clear",
-}
+import { Command } from "~models/Command";
+import { Status } from "~models/Status";
 
 export function reviver(key, value) {
   if (typeof value === "object" && value !== null) {

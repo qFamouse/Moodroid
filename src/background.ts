@@ -1,5 +1,7 @@
 import type { Question } from "~models/Question";
-import { Command, replacer, reviver, Status } from "~utils/QuestionDatabase";
+import { replacer, reviver } from "~utils/QuestionDatabase";
+import { Command } from "~models/Command";
+import { Status } from "~models/Status";
 
 export {}
 
