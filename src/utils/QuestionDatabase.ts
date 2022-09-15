@@ -1,6 +1,7 @@
 import type { Question } from "~models/Question";
 import { Command } from "~models/Command";
 import { Status } from "~models/Status";
+import {squeezeText} from "~utils/squeezeText";
 
 export function reviver(key, value) {
   if (typeof value === "object" && value !== null) {
@@ -23,6 +24,13 @@ export function replacer(key, value) {
 }
 
 export class QuestionDatabase {
+  static generateKey(text : string, images : NodeListOf<HTMLImageElement>) : string {
+    images.forEach(image => {
+      text += (image as HTMLImageElement).src;
+    });
+
+    return squeezeText(text);
+  }
 
   static import(data: string): void {
     chrome.runtime.sendMessage({command: Command.Import, data: data}, function(response) {
