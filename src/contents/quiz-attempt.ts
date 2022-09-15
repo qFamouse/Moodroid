@@ -1,7 +1,6 @@
 import type {PlasmoContentScript} from "plasmo"
 import {QuizParser} from "~utils/QuizParser";
 import {squeezeText} from "~utils/squeezeText";
-import {Question, QuestionType} from "~models/Question";
 import {QuestionDatabase} from "~utils/QuestionDatabase";
 import {QuestionType} from "~models/QuestionType";
 
@@ -10,7 +9,7 @@ export const config: PlasmoContentScript = {
 }
 
 window.addEventListener("load", () => {
-    let ques = document.querySelectorAll('.que');
+    let ques = document.querySelectorAll('.que') as NodeListOf<HTMLElement>;
 
     ques.forEach(que => {
         let squeezedQueText = squeezeText(QuizParser.getQuestionText(que));
@@ -19,13 +18,11 @@ window.addEventListener("load", () => {
             if (question != undefined) {
                 switch (QuizParser.getQuestionType(que.classList)) {
                     case QuestionType.multichoice:
-                        let rows = QuizParser.getQuestionRows(que);
-                        rows.forEach(row => {
-                            console.log(question.answers);
-                            question.answers.forEach(answer => {
-                                if (squeezeText(QuizParser.getQuestionTextFromRow(row)) == squeezeText(answer)) {
+                        QuizParser.getQuestionAnswersAsElements(que).forEach(answer => {
+                            question.correctAnswers.forEach(correctAnswer => {
+                                if (answer.text.textContent == correctAnswer) {
                                     // TODO: Tip for multichoice
-                                    (row.querySelector("input[type=checkbox], input[type=radio]") as HTMLInputElement).checked = true;
+                                    (answer.parent.querySelector("input[type=checkbox], input[type=radio]") as HTMLInputElement).checked = true;
                                 }
                             })
                         })
@@ -33,22 +30,26 @@ window.addEventListener("load", () => {
 
                     case QuestionType.shortanswer:
                     case QuestionType.essay:
-                        let input = QuizParser.getQuestionInput(que);
-                        if (question.answers.length == 1) {
+                        let inputs = QuizParser.getQuestionAnswersAsElements(que);
+                        // TODO: stupid check == 1, but not check != 0
+                        if (question.correctAnswers.length == 1 && inputs.length == 1) {
                             // TODO: Tip for written answer
-                            input.value = question.answers[0];
-                        } else {
-                            question.answers.forEach(answer => console.log(answer));
+                            inputs[0].input.value = question.correctAnswers[0];
+                        }
+                        else if (question.correctAnswers.length == 0) {
+                            console.log("There is no answer to this question in the database")
+                        }
+                        else {
                             throw new Error(`There is more than one answer for one input.`)
+
                         }
                         break;
 
                     case QuestionType.match:
-                        QuizParser.getMatchElements(que).forEach(matchQuestion => {
-                            let textIndex = question.answers.indexOf(matchQuestion.text.textContent);
-                            matchQuestion.getOptions().forEach(option => {
-                                // TODO: Tip for match answer
-                                if (squeezeText(option.text) == squeezeText(question.answers[textIndex+1])) {
+                        QuizParser.getQuestionAnswersAsElements(que).forEach(answer => {
+                            let correctAnswerIndex = question.correctAnswers.indexOf(answer.text.textContent);
+                            answer.input.querySelectorAll("option").forEach(option => {
+                                if (option.text == question.correctAnswers[correctAnswerIndex+1]) {
                                     option.selected = true;
                                 }
                             })
