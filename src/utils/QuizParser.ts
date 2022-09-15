@@ -1,6 +1,6 @@
-import {QuestionType} from "~models/Question";
-import {MatchElement} from "~models/MatchElement";
+import type {AnswerElement} from "~models/AnswerElement";
 
+import {QuestionType} from "~models/QuestionType";
 
 export class QuizParser {
     private static hasRows(que : Element) : boolean {
