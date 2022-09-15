@@ -1,73 +1,80 @@
 import type {PlasmoContentScript} from "plasmo"
-import {Question, QuestionType} from "~models/Question";
-import {QuizParser} from "~utils/QuizParser";
 import {QuestionDatabase} from "~utils/QuestionDatabase";
-import {squeezeText} from "~utils/squeezeText";
+import {QuizParser} from "~utils/QuizParser";
+import type {Question} from "~models/Question";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/review.php*"]
 }
 
-function isCorrectQuestion(que : Element) {
-    if (!que.classList.contains(`correct`)) {
-        let grade = que.querySelector('.grade')
-        let parsedGrades = [...grade.textContent.matchAll(/\d[.,]\d+|\d+/g)];
-
-        if (parsedGrades.length == 2) {
-            if (parseFloat(parsedGrades[0][0]) != parseFloat(parsedGrades[1][0])) {
-                return false;
-            }
-        }
-        else {
-            throw new Error("The score parsing failed. There should be 2 grades")
-        }
-    }
-
-    return true;
-}
-
-
 window.addEventListener("load", () => {
-    let ques = document.querySelectorAll('.que:not(.incorrect),.que.correct')
+    let ques = document.querySelectorAll('.que') as NodeListOf<HTMLElement>
 
-    ques.forEach(que => {
-        if (isCorrectQuestion(que)) {
-            let type = QuizParser.getQuestionType(que.classList);
-            let question : Question = {
-                text: QuizParser.getQuestionText(que),
-                type: type,
-                answers: getCorrectAnswers(que, type)
+    if (ques.length != 0) {
+        ques.forEach(que => {
+            let question : Question;
+            if (QuizParser.isCorrectQuestion(que)) {
+                console.log('Correct question');
+            }
+            else {
+                // TODO: check feedback to the right answer
+                console.log('Incorrect question');
             }
 
-            QuestionDatabase.add(squeezeText(question.text), question);
-        }
-    })
-})
+            question = {
+                text: QuizParser.getQuestionText(que),
+                type: QuizParser.getQuestionType(que.classList),
+                correctAnswers: QuizParser.getCorrectAnswers(que),
+                incorrectAnswers: QuizParser.getIncorrectAnswers(que)
+            }
 
-function getCorrectAnswers(que : Element, type : QuestionType) : string[] {
-    let answers : string[] = [];
+            console.log(question);
 
-    switch (type) {
-        case QuestionType.multichoice: // radio & checkbox
-            que.querySelectorAll(".answer>[class^=r].correct, .answer>[class^=r]:has(input:checked)")
-                .forEach(r => {
-                   answers.push(r.querySelector(".flex-fill.ml-1").textContent)
-                });
-            break;
-
-        case QuestionType.shortanswer: // input & textarea
-        case QuestionType.multianswer:
-        case QuestionType.rightanswer:
-        case QuestionType.essay:
-            answers.push((que.querySelector(".answer>input,.answer>textarea") as HTMLInputElement).value)
-            break;
-
-        case QuestionType.match:
-            que.querySelectorAll(".answer>tbody>[class^=r]").forEach(r => {
-                answers.push(r.querySelector(".text").textContent); // text
-                answers.push(r.querySelector("option:checked").textContent) // control
-            });
+            QuestionDatabase.add(
+                QuestionDatabase.generateKey(question.text, QuizParser.getQuestionImages(que)),
+                question);
+        })
+    }
+    else {
+        console.log(`Couldn't find the right questions`)
     }
 
-    return answers;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+    // ques.forEach(que => {
+    //     // let parser : NewQuizParser = new NewQuizParser(que as HTMLElement);
+    //
+    //     let a = new NewQuizParser(que as HTMLElement);
+    //
+    //     console.log(QuizParser.getCorrectAnswers(que as HTMLElement));
+    //
+    //     // console.log(QuizParser.getQuestionAnswersAsElements(que));
+    //
+    //
+    //
+    //     return;
+    //
+    //     if (isCorrectQuestion(que)) {
+    //         let type = QuizParser.getQuestionType(que.classList);
+    //         let question : Question = {
+    //             text: QuizParser.getQuestionText(que),
+    //             type: type,
+    //             answers: getCorrectAnswers(que, type)
+    //         }
+    //
+    //         console.log(que.querySelectorAll("img"));
+    //
+    //         QuestionDatabase.add(squeezeText(question.text), question);
+    //     }
+    // })
+})
