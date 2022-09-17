@@ -7,14 +7,37 @@ export {}
 
 let questions: Map<string, Question> = new Map();
 
+function importQuestion(questionToImport: Question, key: string): void {
+  let questionInDb = questions.get(key);
+
+  if (questionInDb.type !== questionToImport.type) {
+    throw new Error(`Can't import question with key "${key}": types are not equal`);
+  }
+
+  if (questionInDb) {
+    questionToImport.correctAnswers.forEach(function(answerToImport) {
+      if (!questionInDb.correctAnswers.find(answerInDb => answerInDb === answerToImport)) {
+        questionInDb.correctAnswers.push(answerToImport);
+      }
+    });
+    questionToImport.incorrectAnswers.forEach(function(answerToImport) {
+      if (!questionInDb.incorrectAnswers.find(answerInDb => answerInDb === answerToImport)) {
+        questionInDb.incorrectAnswers.push(answerToImport);
+      }
+    });
+  } else {
+    questions.set(key, questionToImport);
+  }
+}
+
 /**
  * Handle request: {command: Command.Import, data: "..."}
  */
 const handleImport = function(request, sender, sendResponse) {
   if (request.command === Command.Import) {
     try {
-      let buf = JSON.parse(request.data, reviver);
-      if (buf) questions = buf;
+      let newQuestions: Map<string, Question> = JSON.parse(request.data, reviver);
+      newQuestions.forEach(importQuestion);
     } catch (err) {
       sendResponse({status: Status.Failed, error: err});
       console.error("Import failed.", err);
