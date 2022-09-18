@@ -31,6 +31,9 @@
   "manifest": {
     "host_permissions": [
       "*://newsdo.vsu.by/*"
+    ],
+    "permissions": [
+      "storage"
     ]
   }
 }
