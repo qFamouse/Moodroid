@@ -2,42 +2,47 @@ import type {PlasmoContentScript} from "plasmo"
 import {QuestionDatabase} from "~utils/QuestionDatabase";
 import {QuizParser} from "~utils/QuizParser";
 import type {Question} from "~models/Question";
+import {isVerifiedUser} from "~utils/isVerifiedUser";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/review.php*"]
 }
 
-window.addEventListener("load", () => {
-    let ques = document.querySelectorAll('.que') as NodeListOf<HTMLElement>
+window.addEventListener("load", async () => {
+    if (await isVerifiedUser()) {
+        let ques = document.querySelectorAll('.que') as NodeListOf<HTMLElement>
 
-    if (ques.length != 0) {
-        ques.forEach(que => {
-            let question : Question;
-            if (QuizParser.isCorrectQuestion(que)) {
-                console.log('Correct question');
-            }
-            else {
-                // TODO: check feedback to the right answer
-                console.log('Incorrect question');
-            }
+        if (ques.length != 0) {
+            ques.forEach(que => {
+                let question : Question;
+                if (QuizParser.isCorrectQuestion(que)) {
+                    console.log('Correct question');
+                }
+                else {
+                    // TODO: check feedback to the right answer
+                    console.log('Incorrect question');
+                }
 
-            question = {
-                text: QuizParser.getQuestionText(que),
-                type: QuizParser.getQuestionType(que.classList),
-                correctAnswers: QuizParser.getCorrectAnswers(que),
-                incorrectAnswers: QuizParser.getIncorrectAnswers(que)
-            }
+                question = {
+                    text: QuizParser.getQuestionText(que),
+                    type: QuizParser.getQuestionType(que.classList),
+                    correctAnswers: QuizParser.getCorrectAnswers(que),
+                    incorrectAnswers: QuizParser.getIncorrectAnswers(que)
+                }
 
-            console.log(question);
+                console.log(question);
 
-            QuestionDatabase.add(
-                QuestionDatabase.generateKey(question.text, QuizParser.getQuestionImages(que)),
-                question);
-        })
+                QuestionDatabase.add(
+                    QuestionDatabase.generateKey(question.text, QuizParser.getQuestionImages(que)),
+                    question);
+            })
+        }
+        else {
+            console.log(`Couldn't find the right questions`)
+        }
     }
-    else {
-        console.log(`Couldn't find the right questions`)
-    }
+
+
 
 
 
