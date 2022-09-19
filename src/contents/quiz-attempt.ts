@@ -62,15 +62,18 @@ window.addEventListener("load", async () => {
                         case QuestionType.match:
                             QuizParser.getQuestionAnswersAsElements(que).forEach(answer => {
                                 let correctAnswerIndex = question.correctAnswers.indexOf(answer.text.textContent);
-                                let select = answer.input.querySelector("select");
-                                answer.input.querySelectorAll("option").forEach(option => {
-                                    if (option.text == question.correctAnswers[correctAnswerIndex + 1]) {
 
-                                        option.style.fontStyle = 'italic'
+                                if (correctAnswerIndex >= 0) {
+                                    answer.input.querySelectorAll("option").forEach(option => {
+                                        // TODO: more cycles, need to optimize
+                                        if (option.textContent == question.correctAnswers[correctAnswerIndex + 1]) {
 
-                                        // option.selected = true;
-                                    }
-                                })
+                                            option.style.fontStyle = 'italic'
+
+                                            // option.selected = true;
+                                        }
+                                    })
+                                }
                             })
 
                             break;
