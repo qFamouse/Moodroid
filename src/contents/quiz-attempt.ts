@@ -4,6 +4,7 @@ import {squeezeText} from "~utils/squeezeText";
 import {QuestionDatabase} from "~utils/QuestionDatabase";
 import {QuestionType} from "~models/QuestionType";
 import {isVerifiedUser} from "~utils/isVerifiedUser";
+import {fillInput} from "~utils/fillInput";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/attempt.php*"]
@@ -11,6 +12,8 @@ export const config: PlasmoContentScript = {
 
 window.addEventListener("load", async () => {
     if (await isVerifiedUser()) {
+
+        let status = CreateStatus();
 
         let ques = document.querySelectorAll('.que') as NodeListOf<HTMLElement>;
 
@@ -25,7 +28,14 @@ window.addEventListener("load", async () => {
                                 question.correctAnswers.forEach(correctAnswer => {
                                     if (answer.text.textContent == correctAnswer) {
                                         // TODO: Tip for multichoice
-                                        (answer.parent.querySelector("input[type=checkbox], input[type=radio]") as HTMLInputElement).checked = true;
+                                        answer.text.addEventListener('mouseover', (event) => {
+                                            status.style.display = 'block';
+                                        });
+                                        answer.text.addEventListener('mouseout', (event) => {
+                                            status.style.display = 'none';
+                                        });
+
+                                        // (answer.parent.querySelector("input[type=checkbox], input[type=radio]") as HTMLInputElement).checked = true;
                                     }
                                 })
                             })
@@ -34,10 +44,13 @@ window.addEventListener("load", async () => {
                         case QuestionType.shortanswer:
                         case QuestionType.essay:
                             let inputs = QuizParser.getQuestionAnswersAsElements(que);
-                            // TODO: stupid check == 1, but not check != 0
                             if (question.correctAnswers.length == 1 && inputs.length == 1) {
                                 // TODO: Tip for written answer
-                                inputs[0].input.value = question.correctAnswers[0];
+                                console.log(inputs[0].input);
+                                console.log(question.correctAnswers[0]);
+                                fillInput(inputs[0].input, question.correctAnswers[0]);
+
+                                // inputs[0].input.value = question.correctAnswers[0];
                             } else if (question.correctAnswers.length == 0) {
                                 console.log("There is no answer to this question in the database")
                             } else {
@@ -49,9 +62,13 @@ window.addEventListener("load", async () => {
                         case QuestionType.match:
                             QuizParser.getQuestionAnswersAsElements(que).forEach(answer => {
                                 let correctAnswerIndex = question.correctAnswers.indexOf(answer.text.textContent);
+                                let select = answer.input.querySelector("select");
                                 answer.input.querySelectorAll("option").forEach(option => {
                                     if (option.text == question.correctAnswers[correctAnswerIndex + 1]) {
-                                        option.selected = true;
+
+                                        option.style.fontStyle = 'italic'
+
+                                        // option.selected = true;
                                     }
                                 })
                             })
@@ -68,5 +85,17 @@ window.addEventListener("load", async () => {
         })
     }
 })
+
+function CreateStatus() {
+    let status = document.createElement("div");
+    status.innerHTML = "•";
+    status.style.position = 'fixed';
+    status.style.fontSize = "50px";
+    status.style.bottom = '100px'
+    status.style.left = '100px'
+    status.style.display = 'none'
+    document.body.appendChild(status);
+    return status;
+}
 
 
