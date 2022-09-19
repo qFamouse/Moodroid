@@ -90,11 +90,15 @@ export class QuestionDatabase {
     });
   }
 
-  static size(): Promise<number> {
-    return new Promise((resolve) => {
-      let size: number = QuestionDatabase.questions.size;
-      resolve(size);
-    });
+  // static size(): Promise<number> {
+  //   return new Promise((resolve) => {
+  //     let size: number = QuestionDatabase.questions.size;
+  //     resolve(size);
+  //   });
+  // }
+
+  static size(): number {
+    return QuestionDatabase.questions.size;
   }
 
   static clear(): void {

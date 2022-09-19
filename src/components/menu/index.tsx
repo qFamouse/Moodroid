@@ -8,7 +8,7 @@ import {download} from "~utils/download";
 
 
 export function Menu() {
-    const [dbSize, setDbSize] = useState(0);
+    const [dbSize, setDbSize] = useState(QuestionDatabase.size);
     const [status, setStatus] = useState("Hello :)");
 
 
@@ -20,7 +20,9 @@ export function Menu() {
                 if (text) {
                     try {
                         QuestionDatabase.import(text);
+                        setDbSize(QuestionDatabase.size);
                         setStatus("Database is loaded")
+
                     }
                     catch (e) {
                         setStatus(e.message)
@@ -31,7 +33,7 @@ export function Menu() {
         else {
             setStatus("Failed database upload");
         }
-        updateDatabaseSize();
+        // updateDatabaseSize();
     }
 
     const downloadDatabaseHandler = (event) : void => {
@@ -41,19 +43,14 @@ export function Menu() {
 
     }
 
-    const clearDatabaseHandler = (event) : void => {
-        QuestionDatabase.clear();
-        updateDatabaseSize();
-    }
+    // const updateDatabaseSize = () : void => {
+    //     QuestionDatabase.size().then(size => {
+    //         setDbSize(size);
+    //     })
+    // }
 
-    const updateDatabaseSize = () : void => {
-        QuestionDatabase.size().then(size => {
-            setDbSize(size);
-        })
-    }
 
-    updateDatabaseSize();
-
+    // updateDatabaseSize();
 
     return (
     <div className={styles.menu}>
@@ -69,7 +66,7 @@ export function Menu() {
             Export
         </label>
         <label className={styles.button}>
-            <input hidden type="button" onClick={clearDatabaseHandler}/>
+            <input hidden type="button" onClick={() => {QuestionDatabase.clear(); setDbSize(QuestionDatabase.size)}}/>
             Clear
         </label>
 
