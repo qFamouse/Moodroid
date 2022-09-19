@@ -8,8 +8,9 @@ import {download} from "~utils/download";
 
 
 export function Menu() {
-    const [isCheats, setIsCheats] = useState(true);
+    const [dbSize, setDbSize] = useState(0);
     const [status, setStatus] = useState("Hello :)");
+
 
     const loadDatabaseHandler = (event) : void => {
         let file = event.target.files[0] as File;
@@ -30,6 +31,7 @@ export function Menu() {
         else {
             setStatus("Failed database upload");
         }
+        updateDatabaseSize();
     }
 
     const downloadDatabaseHandler = (event) : void => {
@@ -39,13 +41,24 @@ export function Menu() {
 
     }
 
-  return (
+    const clearDatabaseHandler = (event) : void => {
+        QuestionDatabase.clear();
+        updateDatabaseSize();
+    }
+
+    const updateDatabaseSize = () : void => {
+        QuestionDatabase.size().then(size => {
+            setDbSize(size);
+        })
+    }
+
+    updateDatabaseSize();
+
+
+    return (
     <div className={styles.menu}>
         <div className={styles.optionHolder}>
-            <ToggleButton
-                text={"Cheats"}
-                checked={isCheats}
-                onChange={(event) => setIsCheats(event.target.checked)}/>
+            <p>Database size: {dbSize}</p>
         </div>
         <label className={styles.button}>
             <input hidden type="file" accept=".json" onInput={loadDatabaseHandler}/>
@@ -54,6 +67,10 @@ export function Menu() {
         <label className={styles.button}>
             <input hidden type="button" onClick={downloadDatabaseHandler} />
             Export
+        </label>
+        <label className={styles.button}>
+            <input hidden type="button" onClick={clearDatabaseHandler}/>
+            Clear
         </label>
 
         <StatusBar text={status}/>
