@@ -118,11 +118,23 @@ export class QuizParser {
             // It is assumed that the question is answered correctly and any marked/selected/written answer is correct.
             switch (this.getQuestionType(que.classList)) {
                 case QuestionType.multichoice:
-                    answers.forEach(answer => {
-                        if (answer.input.checked) {
-                            correctAnswers.push(answer.text.textContent)
-                        }
-                    })
+                    // For checkbox - SDO BUG - where we can check all answers (its max grade)
+                    if (que.classList.contains('correct')) {
+                        answers.forEach(answer => {
+                            if (answer.parent.classList.contains('correct')) {
+                                correctAnswers.push(answer.text.textContent)
+                            }
+                        })
+                    }
+                    else {
+                        answers.forEach(answer => {
+                            if (answer.input.checked) {
+                                correctAnswers.push(answer.text.textContent)
+                            }
+                        })
+                    }
+
+
                     break;
 
                 case QuestionType.shortanswer:
