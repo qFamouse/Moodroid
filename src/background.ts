@@ -1,26 +1,77 @@
 import type { Question } from "~models/Question";
 import { replacer, reviver } from "~utils/QuestionDatabase";
 import { Command } from "~models/Command";
-import { Status } from "~models/Status";
+import { FailedResponse } from "~models/FailedResponse";
+import { SuccessResponse } from "~models/SuccessResponse";
 
 export {}
 
+const localStorageKey = "database";
 let questions: Map<string, Question> = new Map();
+
+function getQuestionsFromLocalStorage() {
+  chrome.storage.local.get([localStorageKey], function(result) {
+    let savedQuestions = result[localStorageKey];
+    if (savedQuestions) {
+      savedQuestions = JSON.parse(savedQuestions, reviver);
+      console.log("Local storage", savedQuestions);
+      questions = savedQuestions;
+    } else {
+      console.log("No data saved in local storage.");
+    }
+  });
+}
+
+function saveQuestionsToLocalStorage() {
+  let value: any = {};
+  value[localStorageKey] = JSON.stringify(questions, replacer);
+  chrome.storage.local.set(value, function() {
+    console.log("Saved to local storage.");
+  });
+}
+
+function importQuestion(questionToImport: Question, key: string): void {
+  let questionInDb = questions.get(key);
+
+  if (questionInDb) {
+    if (questionInDb.type !== questionToImport.type) {
+      throw new Error(`Can't import question with key "${key}": types are not equal`);
+    }
+
+    questionToImport.correctAnswers.forEach(function(answerToImport) {
+      if (!questionInDb.correctAnswers.find(answerInDb => answerInDb === answerToImport)) {
+        questionInDb.correctAnswers.push(answerToImport);
+      }
+    });
+    questionToImport.incorrectAnswers.forEach(function(answerToImport) {
+      if (!questionInDb.incorrectAnswers.find(answerInDb => answerInDb === answerToImport)) {
+        questionInDb.incorrectAnswers.push(answerToImport);
+      }
+    });
+  } else {
+    questions.set(key, questionToImport);
+  }
+};
 
 /**
  * Handle request: {command: Command.Import, data: "..."}
  */
 const handleImport = function(request, sender, sendResponse) {
+  console.log(request);
+
   if (request.command === Command.Import) {
     try {
-      let buf = JSON.parse(request.data, reviver);
-      if (buf) questions = buf;
+      let newQuestions: Map<string, Question> = JSON.parse(request.data, reviver);
+      newQuestions.forEach(importQuestion);
     } catch (err) {
-      sendResponse({status: Status.Failed, error: err});
+      let response: any = new FailedResponse();
+      response.error = err;
+      sendResponse(response);
       console.error("Import failed.", err);
     }
-    sendResponse({status: Status.Success});
+    sendResponse(new SuccessResponse());
     console.log("Imported successfully.", questions);
+    saveQuestionsToLocalStorage();
   }
 }
 
@@ -30,7 +81,9 @@ const handleImport = function(request, sender, sendResponse) {
 const handleExport = function(request, sender, sendResponse) {
   if (request.command === Command.Export) {
     let text = JSON.stringify(questions, replacer);
-    sendResponse({status: Status.Success, text: text});
+    let response: any = new SuccessResponse();
+    response.text = text;
+    sendResponse(response);
     console.log("Exported successfully.");
   }
 }
@@ -41,8 +94,9 @@ const handleExport = function(request, sender, sendResponse) {
 const handleAdd = function(request, sender, sendResponse) {
   if (request.command === Command.Add) {
     questions.set(request.key, request.question);
-    sendResponse({status: Status.Success});
+    sendResponse(new SuccessResponse());
     console.log("Question added.", request.question);
+    saveQuestionsToLocalStorage();
   }
 }
 
@@ -52,7 +106,9 @@ const handleAdd = function(request, sender, sendResponse) {
 const handleGet = function(request, sender, sendResponse) {
   if (request.command === Command.Get) {
     let question = questions.get(request.key);
-    sendResponse({status: Status.Success, question: question});
+    let response: any = new SuccessResponse();
+    response.question = question;
+    sendResponse(response);
     console.log("Question sent.", question);
   }
 }
@@ -62,7 +118,9 @@ const handleGet = function(request, sender, sendResponse) {
  */
 const handleSize = function(request, sender, sendResponse) {
   if (request.command === Command.Size) {
-    sendResponse({status: Status.Success, size: questions.size});
+    let response: any = new SuccessResponse();
+    response.size = questions.size;
+    sendResponse(response);
   }
 }
 
@@ -72,9 +130,12 @@ const handleSize = function(request, sender, sendResponse) {
 const handleClear = function(request, sender, sendResponse) {
   if (request.command === Command.Clear) {
     questions.clear();
-    sendResponse({status: Status.Success});
+    sendResponse(new SuccessResponse());
+    saveQuestionsToLocalStorage();
   }
 }
+
+getQuestionsFromLocalStorage();
 
 // add listeners
 chrome.runtime.onMessage.addListener(handleImport);

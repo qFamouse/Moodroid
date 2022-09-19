@@ -1,7 +1,12 @@
 import type { Question } from "~models/Question";
-import { Command } from "~models/Command";
 import { Status } from "~models/Status";
 import {squeezeText} from "~utils/squeezeText";
+import { ImportRequest } from "~models/ImportRequest";
+import { ExportRequest } from "~models/ExportRequest";
+import { AddRequest } from "~models/AddRequest";
+import { GetRequest } from "~models/GetRequest";
+import { SizeRequest } from "~models/SizeRequest";
+import { ClearRequest } from "~models/ClearRequest";
 
 export function reviver(key, value) {
   if (typeof value === "object" && value !== null) {
@@ -33,7 +38,7 @@ export class QuestionDatabase {
   }
 
   static import(data: string): void {
-    chrome.runtime.sendMessage({command: Command.Import, data: data}, function(response) {
+    chrome.runtime.sendMessage(new ImportRequest(data), function(response) {
       if (response.status !== Status.Success) {
         throw new Error("Failed to import data to database.");
       }
@@ -42,7 +47,7 @@ export class QuestionDatabase {
 
   static export(): Promise<string> {
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage({command: Command.Export}, function(response) {
+      chrome.runtime.sendMessage(new ExportRequest(), function(response) {
         if (response.status !== Status.Success) {
           throw new Error("Failed to export data from database.");
         }
@@ -52,7 +57,7 @@ export class QuestionDatabase {
   }
 
   static add(key: string, question: Question): void {
-    chrome.runtime.sendMessage({command: Command.Add, key: key, question: question}, function(response) {
+    chrome.runtime.sendMessage(new AddRequest(key, question), function(response) {
       if (response.status !== Status.Success) {
         throw new Error("Failed to add question to database.");
       }
@@ -61,7 +66,7 @@ export class QuestionDatabase {
 
   static get(key: string): Promise<Question> {
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage({command: Command.Get, key: key}, function(response) {
+      chrome.runtime.sendMessage(new GetRequest(key), function(response) {
         if (response.status != Status.Success) {
           throw new Error("Failed to get question from database.");
         }
@@ -72,7 +77,7 @@ export class QuestionDatabase {
 
   static size(): Promise<number> {
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage({command: Command.Size}, function(response) {
+      chrome.runtime.sendMessage(new SizeRequest(), function(response) {
         if (response.status !== Status.Success) {
           throw new Error("Failed get database size.");
         }
@@ -82,7 +87,7 @@ export class QuestionDatabase {
   }
 
   static clear(): void {
-    chrome.runtime.sendMessage({command: Command.Clear}, function(response) {
+    chrome.runtime.sendMessage(new ClearRequest(), function(response) {
       if (response.status !== Status.Success) {
         throw new Error("Failed to clear database.");
       }
