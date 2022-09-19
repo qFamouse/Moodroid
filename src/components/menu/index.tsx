@@ -45,7 +45,7 @@ export function Menu() {
             <ToggleButton
                 text={"Cheats"}
                 checked={isCheats}
-                onClick={(event) => setIsCheats(event.target.checked)}/>
+                onChange={(event) => setIsCheats(event.target.checked)}/>
         </div>
         <label className={styles.button}>
             <input hidden type="file" accept=".json" onInput={loadDatabaseHandler}/>

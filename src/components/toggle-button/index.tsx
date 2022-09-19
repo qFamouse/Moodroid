@@ -10,7 +10,7 @@ interface IToggleButtonOptionalProps {
     text?: string;
     checked?: boolean;
 
-    onClick?: any;
+    onChange?: any;
 }
 
 const defaultProps: IToggleButtonOptionalProps = {
@@ -20,14 +20,14 @@ const defaultProps: IToggleButtonOptionalProps = {
 interface IToggleButtonProps extends IToggleButtonRequiredProps, IToggleButtonOptionalProps {}
 
 const ToggleButton = (props: IToggleButtonProps) => {
-    const { text, checked, onClick } = props;
+    const { text, checked, onChange } = props;
     const toggleId = useId();
 
     return (
     <div className={styles.toggle}>
         <label htmlFor={toggleId} className={styles.noselect}>{text}</label>
         <label className={styles.switch}>
-            <input id={toggleId} type="checkbox" onClick={onClick} checked={checked}/>
+            <input id={toggleId} type="checkbox" onChange={onChange} checked={checked}/>
             <span className={styles.slider}/>
         </label>
     </div>
