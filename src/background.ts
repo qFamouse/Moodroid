@@ -9,16 +9,18 @@ export {}
 const localStorageKey = "database";
 let questions: Map<string, Question> = new Map();
 
-function getQuestionsFromLocalStorage() {
-  chrome.storage.local.get([localStorageKey], function(result) {
-    let savedQuestions = result[localStorageKey];
-    if (savedQuestions) {
-      savedQuestions = JSON.parse(savedQuestions, reviver);
-      console.log("Local storage", savedQuestions);
-      questions = savedQuestions;
-    } else {
-      console.log("No data saved in local storage.");
-    }
+function getQuestionsFromLocalStorage(): Promise<Map<string, Question>> {
+  return new Promise((resolve) => {
+    chrome.storage.local.get([localStorageKey], function(result) {
+      let savedQuestions = result[localStorageKey];
+      if (savedQuestions) {
+        savedQuestions = JSON.parse(savedQuestions, reviver);
+        console.log("Local storage", savedQuestions);
+      } else {
+        console.log("No data saved in local storage.");
+      }
+      resolve(savedQuestions);
+    });
   });
 }
 
@@ -135,17 +137,18 @@ const handleClear = function(request, sender, sendResponse) {
   }
 }
 
-getQuestionsFromLocalStorage();
+getQuestionsFromLocalStorage().then(savedQuestions => {
+  questions = savedQuestions || questions;
 
-// add listeners
-chrome.runtime.onMessage.addListener(handleImport);
+  chrome.runtime.onMessage.addListener(handleImport);
 
-chrome.runtime.onMessage.addListener(handleExport);
-
-chrome.runtime.onMessage.addListener(handleAdd);
-
-chrome.runtime.onMessage.addListener(handleGet);
-
-chrome.runtime.onMessage.addListener(handleSize);
-
-chrome.runtime.onMessage.addListener(handleClear);
+  chrome.runtime.onMessage.addListener(handleExport);
+  
+  chrome.runtime.onMessage.addListener(handleAdd);
+  
+  chrome.runtime.onMessage.addListener(handleGet);
+  
+  chrome.runtime.onMessage.addListener(handleSize);
+  
+  chrome.runtime.onMessage.addListener(handleClear);
+});
