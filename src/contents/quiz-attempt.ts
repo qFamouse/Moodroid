@@ -28,14 +28,22 @@ window.addEventListener("load", async () => {
                                 question.correctAnswers.forEach(correctAnswer => {
                                     if (answer.text.textContent == correctAnswer) {
                                         // TODO: Tip for multichoice
-                                        answer.text.addEventListener('mouseover', (event) => {
-                                            status.style.display = 'block';
-                                        });
-                                        answer.text.addEventListener('mouseout', (event) => {
-                                            status.style.display = 'none';
-                                        });
+
+                                        // answer.text.addEventListener('mouseover', (event) => {
+                                        //     status.style.display = 'block';
+                                        // });
+                                        // answer.text.addEventListener('mouseout', (event) => {
+                                        //     status.style.display = 'none';
+                                        // });
 
                                         // (answer.parent.querySelector("input[type=checkbox], input[type=radio]") as HTMLInputElement).checked = true;
+
+                                        if (question.correctAnswers.indexOf(answer.text.textContent) >= 0) {
+                                            answer.text.style.background = 'green';
+                                        }
+                                        else if (question.incorrectAnswers.indexOf(answer.text.textContent) >= 0) {
+                                            answer.text.style.background = 'red';
+                                        }
                                     }
                                 })
                             })
@@ -48,9 +56,11 @@ window.addEventListener("load", async () => {
                                 // TODO: Tip for written answer
                                 console.log(inputs[0].input);
                                 console.log(question.correctAnswers[0]);
-                                fillInput(inputs[0].input, question.correctAnswers[0]);
 
-                                // inputs[0].input.value = question.correctAnswers[0];
+                                // fillInput(inputs[0].input, question.correctAnswers[0]);
+
+                                inputs[0].input.value = question.correctAnswers[0];
+
                             } else if (question.correctAnswers.length == 0) {
                                 console.log("There is no answer to this question in the database")
                             } else {
@@ -68,7 +78,9 @@ window.addEventListener("load", async () => {
                                         // TODO: more cycles, need to optimize
                                         if (option.textContent == question.correctAnswers[correctAnswerIndex + 1]) {
 
-                                            option.style.fontStyle = 'italic'
+                                            option.style.background = 'green'
+
+                                            // option.style.fontStyle = 'italic'
 
                                             // option.selected = true;
                                         }
