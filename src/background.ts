@@ -7,20 +7,33 @@ import { SuccessResponse } from "~models/SuccessResponse";
 export {}
 
 const localStorageKey = "database";
-let questions: Map<string, Question> = new Map();
+let questions: Map<string, Question> = undefined;
 
-async function getQuestionsFromLocalStorage(): Promise<Map<string, Question>> {
+/**
+ * @returns empty object
+ */
+function loadQuestionsFromLocalStorageIfUndefined(): Promise<object> {
   return new Promise((resolve) => {
-    chrome.storage.local.get([localStorageKey], function(result) {
-      let savedQuestions = result[localStorageKey];
-      if (savedQuestions) {
-        savedQuestions = JSON.parse(savedQuestions, reviver);
-        console.log("Local storage", savedQuestions);
-      } else {
-        console.log("No data saved in local storage.");
-      }
-      resolve(savedQuestions);
-    });
+    if (!questions) {
+      chrome.storage.local.get([localStorageKey], function(result) {
+        let questionsSerialized: string = result[localStorageKey];
+        if (questionsSerialized) {
+          try {
+            questions = JSON.parse(questionsSerialized, reviver) || new Map();
+            console.log("Local storage", questions);
+          } catch (err) {
+            questions = new Map();
+            console.error("Failed to get data from local storage.", err);
+          }
+        } else {
+          questions = new Map();
+          console.log("No data saved in local storage.");
+        }
+        resolve({});
+      });
+    } else {
+      resolve({});
+    }
   });
 }
 
@@ -59,19 +72,22 @@ function importQuestion(questionToImport: Question, key: string): void {
  * Handle request: {command: Command.Import, data: "..."}
  */
 const handleImport = function(request, sender, sendResponse) {
-  if (request.command === Command.Import) {
-    try {
-      let newQuestions: Map<string, Question> = JSON.parse(request.data, reviver);
-      newQuestions.forEach(importQuestion);
-    } catch (err) {
-      let response: any = new FailedResponse();
-      response.error = err;
-      sendResponse(response);
-      console.error("Import failed.", err);
-    }
-    sendResponse(new SuccessResponse());
-    console.log("Imported successfully.", questions);
-    saveQuestionsToLocalStorage();
+  if (request.command === Command.Import) {  
+    loadQuestionsFromLocalStorageIfUndefined().then(function() {
+      try {
+        let newQuestions: Map<string, Question> = JSON.parse(request.data, reviver);
+        newQuestions.forEach(importQuestion);
+      } catch (err) {
+        let response: any = new FailedResponse();
+        response.error = err;
+        sendResponse(response);
+        console.error("Import failed.", err);
+      }
+      sendResponse(new SuccessResponse());
+      console.log("Imported successfully.", questions);
+      saveQuestionsToLocalStorage();
+    });
+    return true;
   }
 }
 
@@ -80,11 +96,14 @@ const handleImport = function(request, sender, sendResponse) {
  */
 const handleExport = function(request, sender, sendResponse) {
   if (request.command === Command.Export) {
-    let text = JSON.stringify(questions, replacer);
-    let response: any = new SuccessResponse();
-    response.text = text;
-    sendResponse(response);
-    console.log("Exported successfully.");
+    loadQuestionsFromLocalStorageIfUndefined().then(function() {
+      let text = JSON.stringify(questions, replacer);
+      let response: any = new SuccessResponse();
+      response.text = text;
+      sendResponse(response);
+      console.log("Exported successfully.");
+    });
+    return true;
   }
 }
 
@@ -93,10 +112,13 @@ const handleExport = function(request, sender, sendResponse) {
  */
 const handleAdd = function(request, sender, sendResponse) {
   if (request.command === Command.Add) {
-    questions.set(request.key, request.question);
-    sendResponse(new SuccessResponse());
-    console.log("Question added.", request.question);
-    saveQuestionsToLocalStorage();
+    loadQuestionsFromLocalStorageIfUndefined().then(function() {
+      questions.set(request.key, request.question);
+      sendResponse(new SuccessResponse());
+      console.log("Question added.", request.question);
+      saveQuestionsToLocalStorage();
+    });
+    return true;
   }
 }
 
@@ -105,11 +127,14 @@ const handleAdd = function(request, sender, sendResponse) {
  */
 const handleGet = function(request, sender, sendResponse) {
   if (request.command === Command.Get) {
-    let question = questions.get(request.key);
-    let response: any = new SuccessResponse();
-    response.question = question;
-    sendResponse(response);
-    console.log("Question sent.", question);
+    loadQuestionsFromLocalStorageIfUndefined().then(function() {
+      let question = questions.get(request.key);
+      let response: any = new SuccessResponse();
+      response.question = question;
+      sendResponse(response);
+      console.log("Question sent.", question);
+    });
+    return true;
   }
 }
 
@@ -118,9 +143,12 @@ const handleGet = function(request, sender, sendResponse) {
  */
 const handleSize = function(request, sender, sendResponse) {
   if (request.command === Command.Size) {
-    let response: any = new SuccessResponse();
-    response.size = questions.size;
-    sendResponse(response);
+    loadQuestionsFromLocalStorageIfUndefined().then(function() {
+      let response: any = new SuccessResponse();
+      response.size = questions.size;
+      sendResponse(response);
+    });
+    return true;
   }
 }
 
@@ -129,15 +157,14 @@ const handleSize = function(request, sender, sendResponse) {
  */
 const handleClear = function(request, sender, sendResponse) {
   if (request.command === Command.Clear) {
-    questions.clear();
-    sendResponse(new SuccessResponse());
-    saveQuestionsToLocalStorage();
+    loadQuestionsFromLocalStorageIfUndefined().then(function() {
+      questions.clear();
+      sendResponse(new SuccessResponse());
+      saveQuestionsToLocalStorage();
+    });
+    return true;
   }
 }
-
-getQuestionsFromLocalStorage().then(savedQuestions => {
-  questions = savedQuestions || questions;
-});
 
 chrome.runtime.onMessage.addListener(handleImport);
 
