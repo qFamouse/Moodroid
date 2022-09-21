@@ -93,9 +93,9 @@ function CreateStatus() {
     let status = document.createElement("div");
     status.innerHTML = "•";
     status.style.position = 'fixed';
-    status.style.fontSize = "50px";
-    status.style.bottom = '100px'
-    status.style.left = '100px'
+    status.style.fontSize = "20px";
+    status.style.bottom = '20px'
+    status.style.left = '20px'
     status.style.display = 'none'
     document.body.appendChild(status);
     return status;
