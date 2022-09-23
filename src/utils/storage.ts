@@ -1,4 +1,5 @@
 import type { Question } from "~models/Question";
+import { reviver } from "./QuestionDatabase";
 
 export enum QuestionImportResult {
   ADDED  = "added",
@@ -105,5 +106,50 @@ export async function importQuestion(questionToImport: Question, questionKey: st
 export async function removeAllQuestionsFromLocalStorate() {
   retrieveAllLocalStorageQuestionKeys().then(function(localStorageQuestionKeys) {
     chrome.storage.local.remove(localStorageQuestionKeys);
+  });
+}
+
+export async function loadDatabaseAsset(path: string) {
+  const databaseUrl: string = chrome.runtime.getURL(path);
+  fetch(databaseUrl)
+  .then((response) => response.text())
+  .then((text) => {
+    try {
+      let questions: Map<string, Question> = JSON.parse(text, reviver);
+      let importResults: Promise<QuestionImportResult>[] = [];
+      let added: number = 0;
+      let merged: number = 0;
+      let failed: number = 0;
+  
+      console.log("Data", questions);
+  
+      questions.forEach(function (questionToImport: Question, questionKey: string) {
+        importResults.push(importQuestion(questionToImport, questionKey));
+      });
+      Promise.allSettled(importResults).then((promiseResults) => {
+        promiseResults.forEach(function(promiseResult) {
+          if (promiseResult.status === "fulfilled") {
+            switch (promiseResult.value) {
+              case QuestionImportResult.ADDED:
+                added++;
+                break;
+              case QuestionImportResult.MERGED:
+                merged++;
+                break;
+            }
+          } else {
+            failed++;
+          }
+        });
+  
+        let status: any = {added: added, merged: merged, failed: failed};
+        console.log(`Imported ${questions.size - failed}`, status);
+      });
+    } catch (err) {
+      console.error("Import failed.", err);
+    }
+  })
+  .catch(() => {
+    console.log("No database asset found.");
   });
 }

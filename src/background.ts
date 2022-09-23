@@ -1,6 +1,9 @@
 import { handleAdd, handleClear, handleExport, handleGet, handleImport, handleSize } from "~utils/handlers";
+import { loadDatabaseAsset } from "~utils/storage";
 
 export {}
+
+loadDatabaseAsset("./assets/database.json");
 
 chrome.runtime.onMessage.addListener(handleImport);
 
