@@ -22,9 +22,7 @@ export const handleImport = function(request: ImportRequest, sender: chrome.runt
 
       let newQuestions: Map<string, Question> = JSON.parse(request.data, reviver);
       importQuestionsToLocalStorage(newQuestions).then(function(importStatus) {
-        let response: any = new SuccessResponse();
-        response.importStatus = importStatus;
-        sendResponse(response);
+        sendResponse(new SuccessResponseWithData(importStatus));
         console.log(`Imported ${newQuestions.size - importStatus.failed}`, importStatus);
       });
     } catch (err) {
@@ -67,7 +65,7 @@ export const handleAdd = function(request: AddRequest, sender: chrome.runtime.Me
  */
 export const handleGet = function(request: GetRequest, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
   if (request.command === Command.Get) {
-    retrieveQuestionFromLocalStorage(request.key).then(function(question: Question) {
+    retrieveQuestionFromLocalStorage(request.key).then(function(question) {
       sendResponse(new SuccessResponseWithData(question));
       console.log("Question sent.", question);
     });

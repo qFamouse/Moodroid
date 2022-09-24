@@ -3,18 +3,50 @@ import { QuestionImportStatus } from "~models/statuses/QuestionImportStatus";
 import type { QuestionsImportStatus } from "~models/statuses/QuestionsImportStatus";
 import { reviver } from "./QuestionDatabase";
 
-export const localStorageQuestionKeyPrefix: string = "QUESTION_KEY_";
+const localStorageQuestionKeyPrefix: string = "QUESTION_KEY_";
 
 export function generateLocalStorageQuestionKey(questionKey: string): string {
   return localStorageQuestionKeyPrefix + questionKey;
+}
+
+export async function importQuestionToLocalStorage(questionToImport: Question, questionKey: string): Promise<QuestionImportStatus> {
+  return new Promise((onImported) => {
+    retrieveQuestionFromLocalStorage(questionKey).then(function(questionInDb) {
+      if (questionInDb) {
+        if (questionInDb.type !== questionToImport.type) {
+          throw new Error(`Can't import question with key "${questionKey}": \
+            types (${questionInDb.type}, ${questionToImport.type}) are not equal`);
+        }
+    
+        questionToImport.correctAnswers.forEach(function(answerToImport) {
+          if (!questionInDb.correctAnswers.find(answerInDb => answerInDb === answerToImport)) {
+            questionInDb.correctAnswers.push(answerToImport);
+          }
+        });
+        questionToImport.incorrectAnswers.forEach(function(answerToImport) {
+          if (!questionInDb.incorrectAnswers.find(answerInDb => answerInDb === answerToImport)) {
+            questionInDb.incorrectAnswers.push(answerToImport);
+          }
+        });
+  
+        saveQuestionToLocalStorage(questionKey, questionInDb).then(function() {
+          onImported(QuestionImportStatus.Merged);
+        });
+      } else {
+        saveQuestionToLocalStorage(questionKey, questionToImport).then(function() {
+          onImported(QuestionImportStatus.Added);
+        });
+      }
+    });
+  });
 }
 
 export async function importQuestionsToLocalStorage(newQuestions: Map<string, Question>): Promise<QuestionsImportStatus> {
   let importStatuses: Promise<QuestionImportStatus>[] = [];
   let status: QuestionsImportStatus = {added: 0, merged: 0, failed: 0};
 
-  newQuestions.forEach(function (questionToImport: Question, questionKey: string) {
-    importStatuses.push(importQuestion(questionToImport, questionKey));
+  newQuestions.forEach(function(questionToImport: Question, questionKey: string) {
+    importStatuses.push(importQuestionToLocalStorage(questionToImport, questionKey));
   });
   return new Promise((onImported) => {
     Promise.allSettled(importStatuses).then((promiseResults) => {
@@ -90,38 +122,6 @@ export async function retrieveQuestionsCountFromLocalStorage(): Promise<number> 
     retrieveAllLocalStorageQuestionKeys().then(function(localStorageQuestionKeys) {
       let count: number = localStorageQuestionKeys.length;
       onRetrieved(count);
-    });
-  });
-}
-
-export async function importQuestion(questionToImport: Question, questionKey: string): Promise<QuestionImportStatus> {
-  return new Promise((onImported) => {
-    retrieveQuestionFromLocalStorage(questionKey).then(function(questionInDb) {
-      if (questionInDb) {
-        if (questionInDb.type !== questionToImport.type) {
-          throw new Error(`Can't import question with key "${questionKey}": \
-            types (${questionInDb.type}, ${questionToImport.type}) are not equal`);
-        }
-    
-        questionToImport.correctAnswers.forEach(function(answerToImport) {
-          if (!questionInDb.correctAnswers.find(answerInDb => answerInDb === answerToImport)) {
-            questionInDb.correctAnswers.push(answerToImport);
-          }
-        });
-        questionToImport.incorrectAnswers.forEach(function(answerToImport) {
-          if (!questionInDb.incorrectAnswers.find(answerInDb => answerInDb === answerToImport)) {
-            questionInDb.incorrectAnswers.push(answerToImport);
-          }
-        });
-  
-        saveQuestionToLocalStorage(questionKey, questionInDb).then(function() {
-          onImported(QuestionImportStatus.Merged);
-        });
-      } else {
-        saveQuestionToLocalStorage(questionKey, questionToImport).then(function() {
-          onImported(QuestionImportStatus.Added);
-        });
-      }
     });
   });
 }
