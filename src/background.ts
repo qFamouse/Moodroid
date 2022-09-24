@@ -3,7 +3,7 @@ import { loadDatabaseAsset } from "~utils/storage";
 
 export {}
 
-loadDatabaseAsset("./assets/database.json");
+loadDatabaseAsset("./database.json");
 
 chrome.runtime.onMessage.addListener(handleImport);
 

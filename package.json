@@ -32,12 +32,6 @@
     "host_permissions": [
       "*://newsdo.vsu.by/*"
     ],
-    "web_accessible_resources": [
-      {
-        "resources": [ "assets/database.json" ],
-        "matches": [ "*://newsdo.vsu.by/*" ]
-      }
-    ],
     "permissions": [
       "storage"
     ]
