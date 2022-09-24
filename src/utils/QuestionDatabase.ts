@@ -1,12 +1,15 @@
 import type { Question } from "~models/Question";
-import { Status } from "~models/Status";
+import { ResponseStatus } from "~models/statuses/ResponseStatus";
 import {squeezeText} from "~utils/squeezeText";
-import { ImportRequest } from "~models/ImportRequest";
-import { ExportRequest } from "~models/ExportRequest";
-import { AddRequest } from "~models/AddRequest";
-import { GetRequest } from "~models/GetRequest";
-import { SizeRequest } from "~models/SizeRequest";
-import { ClearRequest } from "~models/ClearRequest";
+import type { QuestionsImportStatus } from "~models/statuses/QuestionsImportStatus";
+import type { SuccessResponseWithData } from "~models/responses/SuccessResponseWithData";
+import type { Response } from "~models/responses/Response";
+import { ImportRequest } from "~models/requests/ImportRequest";
+import { ExportRequest } from "~models/requests/ExportRequest";
+import { AddRequest } from "~models/requests/AddRequest";
+import { GetRequest } from "~models/requests/GetRequest";
+import { SizeRequest } from "~models/requests/SizeRequest";
+import { ClearRequest } from "~models/requests/ClearRequest";
 
 export function reviver(key, value) {
   if (typeof value === "object" && value !== null) {
@@ -29,6 +32,15 @@ export function replacer(key, value) {
 }
 
 export class QuestionDatabase {
+
+  private static handleResponseWithData(response: Response, resolve: (value: any) => void, error: Error) {
+    if (response.status === ResponseStatus.Success) {
+      resolve((response as SuccessResponseWithData).data);
+    } else {
+      throw error;
+    }
+  }
+
   static generateKey(text : string, images : NodeListOf<HTMLImageElement>) : string {
     images.forEach(image => {
       text += (image as HTMLImageElement).src;
@@ -37,58 +49,49 @@ export class QuestionDatabase {
     return squeezeText(text);
   }
 
-  static import(data: string): void {
-    chrome.runtime.sendMessage(new ImportRequest(data), function(response) {
-      if (response.status !== Status.Success) {
-        throw new Error("Failed to import data to database.");
-      }
-    });
-  }
-
-  static export(): Promise<string> {
-    return new Promise((resolve) => {
-      chrome.runtime.sendMessage(new ExportRequest(), function(response) {
-        if (response.status !== Status.Success) {
-          throw new Error("Failed to export data from database.");
-        }
-        resolve(response.text);
+  static async import(data: string): Promise<QuestionsImportStatus> {
+    return new Promise((onRecieved) => {
+      chrome.runtime.sendMessage(new ImportRequest(data), function(response: Response) {
+        QuestionDatabase.handleResponseWithData(response, onRecieved, new Error("Failed to import questions."));
       });
     });
   }
 
-  static add(key: string, question: Question): void {
-    chrome.runtime.sendMessage(new AddRequest(key, question), function(response) {
-      if (response.status !== Status.Success) {
+  static export(): Promise<string> {
+    return new Promise((onExported) => {
+      chrome.runtime.sendMessage(new ExportRequest(), function(response: Response) {
+        QuestionDatabase.handleResponseWithData(response, onExported, new Error("Failed to export questions."));
+      });
+    });
+  }
+
+  static add(key: string, question: Question) {
+    chrome.runtime.sendMessage(new AddRequest(key, question), function(response: Response) {
+      if (response.status !== ResponseStatus.Success) {
         throw new Error("Failed to add question to database.");
       }
     });
   }
 
-  static get(key: string): Promise<Question> {
-    return new Promise((resolve) => {
-      chrome.runtime.sendMessage(new GetRequest(key), function(response) {
-        if (response.status != Status.Success) {
-          throw new Error("Failed to get question from database.");
-        }
-        resolve(response.question);
+  static async get(key: string): Promise<Question> {
+    return new Promise((onRecieved) => {
+      chrome.runtime.sendMessage(new GetRequest(key), function(response: Response) {
+        QuestionDatabase.handleResponseWithData(response, onRecieved, new Error("Failed to get question."));
       });
     });
   }
 
-  static size(): Promise<number> {
-    return new Promise((resolve) => {
-      chrome.runtime.sendMessage(new SizeRequest(), function(response) {
-        if (response.status !== Status.Success) {
-          throw new Error("Failed get database size.");
-        }
-        resolve(response.size);
+  static async size(): Promise<number> {
+    return new Promise((onRecieved) => {
+      chrome.runtime.sendMessage(new SizeRequest(), function(response: Response) {
+        QuestionDatabase.handleResponseWithData(response, onRecieved, new Error("Failed to get database size."));
       });
     });
   }
 
-  static clear(): void {
-    chrome.runtime.sendMessage(new ClearRequest(), function(response) {
-      if (response.status !== Status.Success) {
+  static clear() {
+    chrome.runtime.sendMessage(new ClearRequest(), function(response: Response) {
+      if (response.status !== ResponseStatus.Success) {
         throw new Error("Failed to clear database.");
       }
     });

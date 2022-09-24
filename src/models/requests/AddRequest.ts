@@ -1,5 +1,5 @@
-import { Command } from "./Command"
-import type { Question } from "./Question";
+import { Command } from "../Command"
+import type { Question } from "../Question";
 import type { Request } from "./Request";
 
 export class AddRequest implements Request {

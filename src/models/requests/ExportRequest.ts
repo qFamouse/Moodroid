@@ -1,4 +1,4 @@
-import { Command } from "./Command"
+import { Command } from "../Command"
 import type { Request } from "./Request";
 
 export class ExportRequest implements Request {

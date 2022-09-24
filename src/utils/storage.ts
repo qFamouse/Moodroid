@@ -1,6 +1,6 @@
 import type { Question } from "~models/Question";
-import { QuestionImportStatus } from "~models/QuestionImportStatus";
-import type { QuestionsImportStatus } from "~models/QuestionsImportStatus";
+import { QuestionImportStatus } from "~models/statuses/QuestionImportStatus";
+import type { QuestionsImportStatus } from "~models/statuses/QuestionsImportStatus";
 import { reviver } from "./QuestionDatabase";
 
 export const localStorageQuestionKeyPrefix: string = "QUESTION_KEY_";
