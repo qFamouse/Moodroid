@@ -3,7 +3,7 @@ import { FailedResponse } from "~models/FailedResponse";
 import type { Question } from "~models/Question";
 import { SuccessResponse } from "~models/SuccessResponse";
 import { replacer, reviver } from "./QuestionDatabase";
-import { importQuestion, QuestionImportResult, removeAllQuestionsFromLocalStorate, retrieveAllQuestionsFromLocalStorage, retrieveQuestionFromLocalStorage, retrieveQuestionsCountFromLocalStorage, saveQuestionToLocalStorage } from "./storage";
+import { importQuestionsToLocalStorage, removeAllQuestionsFromLocalStorate, retrieveAllQuestionsFromLocalStorage, retrieveQuestionFromLocalStorage, retrieveQuestionsCountFromLocalStorage, saveQuestionToLocalStorage } from "./storage";
 
 /**
  * Handle request: {command: Command.Import, data: "..."}
@@ -14,39 +14,11 @@ export const handleImport = function(request: any, sender: chrome.runtime.Messag
       console.log("Import requested.");
 
       let newQuestions: Map<string, Question> = JSON.parse(request.data, reviver);
-      let importResults: Promise<QuestionImportResult>[] = [];
-      let added: number = 0;
-      let merged: number = 0;
-      let failed: number = 0;
-
-      console.log("Data", newQuestions);
-
-      newQuestions.forEach(function (questionToImport: Question, questionKey: string) {
-        importResults.push(importQuestion(questionToImport, questionKey));
-      });
-      Promise.allSettled(importResults).then((promiseResults) => {
-        promiseResults.forEach(function(promiseResult) {
-          if (promiseResult.status === "fulfilled") {
-            switch (promiseResult.value) {
-              case QuestionImportResult.ADDED:
-                added++;
-                break;
-              case QuestionImportResult.MERGED:
-                merged++;
-                break;
-            }
-          } else {
-            failed++;
-          }
-        });
-
+      importQuestionsToLocalStorage(newQuestions).then(function(importStatus) {
         let response: any = new SuccessResponse();
-        let status: any = {};
-        response.added  = status.added  = added;
-        response.merged = status.merged = merged;
-        response.failed = status.failed = failed;
+        response.importStatus = importStatus;
         sendResponse(response);
-        console.log(`Imported ${newQuestions.size - failed}`, status);
+        console.log(`Imported ${newQuestions.size - importStatus.failed}`, importStatus);
       });
     } catch (err) {
       let response: any = new FailedResponse();

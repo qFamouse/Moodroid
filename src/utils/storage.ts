@@ -1,15 +1,40 @@
 import type { Question } from "~models/Question";
+import { QuestionImportStatus } from "~models/QuestionImportStatus";
+import type { QuestionsImportStatus } from "~models/QuestionsImportStatus";
 import { reviver } from "./QuestionDatabase";
-
-export enum QuestionImportResult {
-  ADDED  = "added",
-  MERGED = "merged",
-}
 
 export const localStorageQuestionKeyPrefix: string = "QUESTION_KEY_";
 
 export function generateLocalStorageQuestionKey(questionKey: string): string {
   return localStorageQuestionKeyPrefix + questionKey;
+}
+
+export async function importQuestionsToLocalStorage(newQuestions: Map<string, Question>): Promise<QuestionsImportStatus> {
+  let importStatuses: Promise<QuestionImportStatus>[] = [];
+  let status: QuestionsImportStatus = {added: 0, merged: 0, failed: 0};
+
+  newQuestions.forEach(function (questionToImport: Question, questionKey: string) {
+    importStatuses.push(importQuestion(questionToImport, questionKey));
+  });
+  return new Promise((onImported) => {
+    Promise.allSettled(importStatuses).then((promiseResults) => {
+      promiseResults.forEach(function(promiseResult) {
+        if (promiseResult.status === "fulfilled") {
+          switch (promiseResult.value) {
+            case QuestionImportStatus.Added:
+              status.added++;
+              break;
+            case QuestionImportStatus.Merged:
+              status.merged++;
+              break;
+          }
+        } else {
+          status.failed++;
+        }
+      });
+      onImported(status);
+    });
+  });
 }
 
 export async function saveQuestionToLocalStorage(questionKey: string, question: Question): Promise<void> {
@@ -35,7 +60,7 @@ export async function retrieveQuestionFromLocalStorage(questionKey: string): Pro
 
 export async function retrieveAllLocalStorageQuestionKeys(): Promise<string[]> {
   return new Promise((onRetrieved) => {
-    chrome.storage.local.get(null, function(localStorage: any) {
+    chrome.storage.local.get(null, function(localStorage) {
       let localStorageQuestionKeys: string[] = Object.keys(localStorage).filter(key => key.startsWith(localStorageQuestionKeyPrefix));
       onRetrieved(localStorageQuestionKeys);
     });
@@ -45,14 +70,14 @@ export async function retrieveAllLocalStorageQuestionKeys(): Promise<string[]> {
 export async function retrieveAllQuestionsFromLocalStorage(): Promise<Map<string, Question>> {
   return new Promise((onRetrieved) => {
     retrieveAllLocalStorageQuestionKeys().then(function(localStorageQuestionKeys) {
-      chrome.storage.local.get(null, function(localStorage: any) {
+      chrome.storage.local.get(null, function(localStorage) {
         let questions: Map<string, Question> = new Map();
 
-        for (let localStorageQuestionKey of localStorageQuestionKeys) {
-          let key: string = localStorageQuestionKey.substring(localStorageQuestionKey.length);
+        localStorageQuestionKeys.forEach(function(localStorageQuestionKey) {
+          let key: string = localStorageQuestionKey.substring(localStorageQuestionKeyPrefix.length);
           let question: Question = localStorage[localStorageQuestionKey];
           questions.set(key, question);
-        }
+        });
   
         onRetrieved(questions);
       });
@@ -62,16 +87,14 @@ export async function retrieveAllQuestionsFromLocalStorage(): Promise<Map<string
 
 export async function retrieveQuestionsCountFromLocalStorage(): Promise<number> {
   return new Promise((onRetrieved) => {
-    chrome.storage.local.get(null, function(result) {
-      retrieveAllLocalStorageQuestionKeys().then(function(localStorageQuestionKeys) {
-        let count: number = localStorageQuestionKeys.length;
-        onRetrieved(count);
-      });
+    retrieveAllLocalStorageQuestionKeys().then(function(localStorageQuestionKeys) {
+      let count: number = localStorageQuestionKeys.length;
+      onRetrieved(count);
     });
   });
 }
 
-export async function importQuestion(questionToImport: Question, questionKey: string): Promise<QuestionImportResult> {
+export async function importQuestion(questionToImport: Question, questionKey: string): Promise<QuestionImportStatus> {
   return new Promise((onImported) => {
     retrieveQuestionFromLocalStorage(questionKey).then(function(questionInDb) {
       if (questionInDb) {
@@ -92,11 +115,11 @@ export async function importQuestion(questionToImport: Question, questionKey: st
         });
   
         saveQuestionToLocalStorage(questionKey, questionInDb).then(function() {
-          onImported(QuestionImportResult.MERGED);
+          onImported(QuestionImportStatus.Merged);
         });
       } else {
         saveQuestionToLocalStorage(questionKey, questionToImport).then(function() {
-          onImported(QuestionImportResult.ADDED);
+          onImported(QuestionImportStatus.Added);
         });
       }
     });
@@ -116,34 +139,8 @@ export async function loadDatabaseAsset(path: string) {
   .then((text) => {
     try {
       let questions: Map<string, Question> = JSON.parse(text, reviver);
-      let importResults: Promise<QuestionImportResult>[] = [];
-      let added: number = 0;
-      let merged: number = 0;
-      let failed: number = 0;
-  
-      console.log("Data", questions);
-  
-      questions.forEach(function (questionToImport: Question, questionKey: string) {
-        importResults.push(importQuestion(questionToImport, questionKey));
-      });
-      Promise.allSettled(importResults).then((promiseResults) => {
-        promiseResults.forEach(function(promiseResult) {
-          if (promiseResult.status === "fulfilled") {
-            switch (promiseResult.value) {
-              case QuestionImportResult.ADDED:
-                added++;
-                break;
-              case QuestionImportResult.MERGED:
-                merged++;
-                break;
-            }
-          } else {
-            failed++;
-          }
-        });
-  
-        let status: any = {added: added, merged: merged, failed: failed};
-        console.log(`Imported ${questions.size - failed}`, status);
+      importQuestionsToLocalStorage(questions).then(function(importStatus) {
+        console.log(`Imported ${questions.size - importStatus.failed}`, importStatus);
       });
     } catch (err) {
       console.error("Import failed.", err);
