@@ -1,85 +1,36 @@
-import type {PlasmoContentScript} from "plasmo"
-import {QuestionDatabase} from "~utils/QuestionDatabase";
-import {QuizParser} from "~utils/QuizParser";
-import type {Question} from "~models/Question";
-import {isVerifiedUser} from "~utils/isVerifiedUser";
+import type { PlasmoContentScript } from "plasmo"
+import { QuestionDatabase } from "~utils/QuestionDatabase";
+import type { Question } from "~models/Question";
+import { isVerifiedUser } from "~utils/isVerifiedUser";
+import { QuestionParser } from "~parsers/QuestionParser";
+import { QuestionsUtil } from "~utils/QuestionsUtil";
 
 export const config: PlasmoContentScript = {
-    matches: ["*://newsdo.vsu.by/mod/quiz/review.php*"]
+  matches: ["*://newsdo.vsu.by/mod/quiz/review.php*"]
 }
 
 window.addEventListener("load", async () => {
-    if (await isVerifiedUser()) {
-        let ques = document.querySelectorAll('.que') as NodeListOf<HTMLElement>
+  if (await isVerifiedUser()) {
+    let ques = document.querySelectorAll('.que') as NodeListOf<HTMLElement>
 
-        if (ques.length != 0) {
-            ques.forEach(que => {
-                let question : Question;
-                if (QuizParser.isCorrectQuestion(que)) {
-                    console.log('Correct question');
-                }
-                else {
-                    // TODO: check feedback to the right answer
-                    console.log('Incorrect question');
-                }
-
-                question = {
-                    text: QuizParser.getQuestionText(que),
-                    type: QuizParser.getQuestionType(que.classList),
-                    correctAnswers: QuizParser.getCorrectAnswers(que),
-                    incorrectAnswers: QuizParser.getIncorrectAnswers(que)
-                }
-
-                console.log(question);
-
-                QuestionDatabase.add(
-                    QuestionDatabase.generateKey(question.text, QuizParser.getQuestionImages(que)),
-                    question);
-            })
-        }
-        else {
-            console.log(`Couldn't find the right questions`)
-        }
+    if (!ques.length) {
+      console.log("No questions found for review");
+      return;
     }
+    
+    ques.forEach(que => {
+      let question: Question = QuestionParser.parse(que);
+      
+      if (!question) {
+        console.log("Can't parse");
+        return;
+      }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // ques.forEach(que => {
-    //     // let parser : NewQuizParser = new NewQuizParser(que as HTMLElement);
-    //
-    //     let a = new NewQuizParser(que as HTMLElement);
-    //
-    //     console.log(QuizParser.getCorrectAnswers(que as HTMLElement));
-    //
-    //     // console.log(QuizParser.getQuestionAnswersAsElements(que));
-    //
-    //
-    //
-    //     return;
-    //
-    //     if (isCorrectQuestion(que)) {
-    //         let type = QuizParser.getQuestionType(que.classList);
-    //         let question : Question = {
-    //             text: QuizParser.getQuestionText(que),
-    //             type: type,
-    //             answers: getCorrectAnswers(que, type)
-    //         }
-    //
-    //         console.log(que.querySelectorAll("img"));
-    //
-    //         QuestionDatabase.add(squeezeText(question.text), question);
-    //     }
-    // })
-})
+      console.log('Correct question', question);
+      let key: string = QuestionsUtil.generateQuestionKey(que);
+      if (key && question) {
+        QuestionDatabase.add(key, question);
+      }
+    });
+  }
+});

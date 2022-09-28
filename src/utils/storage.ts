@@ -17,17 +17,8 @@ export async function importQuestionToLocalStorage(questionToImport: Question, q
           throw new Error(`Can't import question with key "${questionKey}": \
             types (${questionInDb.type}, ${questionToImport.type}) are not equal`);
         }
-    
-        questionToImport.correctAnswers.forEach(function(answerToImport) {
-          if (!questionInDb.correctAnswers.find(answerInDb => answerInDb === answerToImport)) {
-            questionInDb.correctAnswers.push(answerToImport);
-          }
-        });
-        questionToImport.incorrectAnswers.forEach(function(answerToImport) {
-          if (!questionInDb.incorrectAnswers.find(answerInDb => answerInDb === answerToImport)) {
-            questionInDb.incorrectAnswers.push(answerToImport);
-          }
-        });
+
+        // TODO: implement import
   
         saveQuestionToLocalStorage(questionKey, questionInDb).then(function() {
           onImported(QuestionImportStatus.Merged);
