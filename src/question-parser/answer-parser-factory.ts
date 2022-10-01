@@ -3,13 +3,15 @@ import type {IAnswerParser} from "~core/interfaces/answer-parser";
 import {MultichoiceParser} from "~question-parser/parsers/multichoice-parser";
 import {MatchParser} from "~question-parser/parsers/match-parser";
 import {ShortanswerParser} from "~question-parser/parsers/shortanswer-parser";
+import {EsseyParser} from "~question-parser/parsers/essey-parser";
 
 export class AnswerParserFactory {
 
     private static questionTypeAnswerParser: Map<QuestionType, () => IAnswerParser> = new Map<QuestionType, () => IAnswerParser>([
         [QuestionType.multichoice, () => new MultichoiceParser()],
         [QuestionType.match, () => new MatchParser()],
-        [QuestionType.shortanswer, () => new ShortanswerParser()]
+        [QuestionType.shortanswer, () => new ShortanswerParser()],
+        [QuestionType.essay, () => new EsseyParser()]
     ]);
 
     static getAnswerParser(questionType: QuestionType): IAnswerParser | undefined {
