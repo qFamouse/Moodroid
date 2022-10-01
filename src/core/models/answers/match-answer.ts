@@ -1,0 +1,13 @@
+import type {IAnswer} from "~core/interfaces/answer";
+
+export class MatchAnswer implements IAnswer {
+    public answers : {
+        text : string,
+        correctAnswer?: string,
+        incorrectAnswers : string[]
+    }[]
+
+    constructor() {
+        this.answers = [];
+    }
+}
