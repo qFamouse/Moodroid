@@ -43,7 +43,7 @@ export class MultichoiceParser implements IAnswerParser {
                 break;
 
             default:
-                throw new Error("Unsupported type");
+                throw new Error("Unsupported group");
         }
 
         if (state == QuestionState.correct) {
