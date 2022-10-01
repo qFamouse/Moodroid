@@ -4,6 +4,7 @@ import {MultichoiceParser} from "~question-parser/parsers/multichoice-parser";
 import {MatchParser} from "~question-parser/parsers/match-parser";
 import {ShortanswerParser} from "~question-parser/parsers/shortanswer-parser";
 import {EsseyParser} from "~question-parser/parsers/essey-parser";
+import {MultianswerParser} from "~question-parser/parsers/multianswer-parser";
 
 export class AnswerParserFactory {
 
@@ -11,7 +12,8 @@ export class AnswerParserFactory {
         [QuestionType.multichoice, () => new MultichoiceParser()],
         [QuestionType.match, () => new MatchParser()],
         [QuestionType.shortanswer, () => new ShortanswerParser()],
-        [QuestionType.essay, () => new EsseyParser()]
+        [QuestionType.essay, () => new EsseyParser()],
+        [QuestionType.multianswer, () => new MultianswerParser()]
     ]);
 
     static getAnswerParser(questionType: QuestionType): IAnswerParser | undefined {
