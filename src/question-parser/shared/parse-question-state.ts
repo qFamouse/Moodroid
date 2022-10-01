@@ -12,12 +12,12 @@ export function parseQuestionState(que: HTMLElement) : QuestionState {
     // Stage 2 - else Parse by 2 marks
     let gradeElement : HTMLElement = que.querySelector('.grade');
     if (gradeElement) {
-        let matchAllNumbers = gradeElement.textContent.match(/\d[.,]\d+|\d+/g);
+        let gradeText = gradeElement.textContent.replaceAll(',', '.');
+        let matchAllNumbers = gradeText.match(/\d[.]\d+|\d+/g);
         let marks = Array.from(matchAllNumbers);
         if (marks.length == 2) {
             let leftMark = parseFloat(marks[0]);
             let rightMark = parseFloat(marks[1]);
-
             if (leftMark == rightMark) { // Mark 0.00 out of 1.00
                 return QuestionState.correct;
             }
