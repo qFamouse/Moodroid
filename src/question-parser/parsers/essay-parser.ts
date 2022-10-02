@@ -11,10 +11,10 @@ export class EssayParser implements IAnswerParser {
             throw new Error("Save only the (partially)correct answers");
         }
 
-        let textarea : HTMLTextAreaElement = que.querySelector(".answer>textarea");
+        let answer : HTMLElement = que.querySelector(".answer");
 
         return {
-            answer: textarea.value
+            answer: answer.textContent
         }
     }
 }
