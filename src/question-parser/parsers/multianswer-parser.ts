@@ -25,6 +25,9 @@ export class MultianswerParser implements IAnswerParser {
                     if (answerCheckIcon.classList.contains("text-success")) {
                         multianswerAnswer.answers.push(input.value);
                     }
+                    else {
+                        multianswerAnswer.answers.push("");
+                    }
                 });
                 return multianswerAnswer;
 
