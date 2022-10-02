@@ -3,7 +3,7 @@ import type {IAnswerParser} from "~core/interfaces/answer-parser";
 import {MultichoiceParser} from "~question-parser/parsers/multichoice-parser";
 import {MatchParser} from "~question-parser/parsers/match-parser";
 import {ShortanswerParser} from "~question-parser/parsers/shortanswer-parser";
-import {EsseyParser} from "~question-parser/parsers/essey-parser";
+import {EssayParser} from "~question-parser/parsers/essay-parser";
 import {MultianswerParser} from "~question-parser/parsers/multianswer-parser";
 
 export class AnswerParserFactory {
@@ -12,7 +12,7 @@ export class AnswerParserFactory {
         [QuestionType.multichoice, () => new MultichoiceParser()],
         [QuestionType.match, () => new MatchParser()],
         [QuestionType.shortanswer, () => new ShortanswerParser()],
-        [QuestionType.essay, () => new EsseyParser()],
+        [QuestionType.essay, () => new EssayParser()],
         [QuestionType.multianswer, () => new MultianswerParser()]
     ]);
 

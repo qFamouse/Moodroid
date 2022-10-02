@@ -1,10 +1,10 @@
 import type {IAnswerParser} from "~core/interfaces/answer-parser";
-import type {EsseyAnswer} from "~core/models/answers/essey-answer";
+import type {EssayAnswer} from "~core/models/answers/essay-answer";
 import {QuestionState} from "~core/models/QuestionState";
 import {parseQuestionState} from "~question-parser/shared/parse-question-state";
 
-export class EsseyParser implements IAnswerParser {
-    parse(que: HTMLElement): EsseyAnswer {
+export class EssayParser implements IAnswerParser {
+    parse(que: HTMLElement): EssayAnswer {
         let state : QuestionState = parseQuestionState(que);
 
         if (state != QuestionState.correct && state != QuestionState.partiallycorrect) {

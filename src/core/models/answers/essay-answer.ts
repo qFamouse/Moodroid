@@ -1,5 +1,5 @@
 import type {IAnswer} from "~core/interfaces/answer";
 
-export class EsseyAnswer implements IAnswer {
+export class EssayAnswer implements IAnswer {
     public answer : string;
 }
