@@ -18,11 +18,10 @@ export class MatchParser implements IAnswerParser {
                     let correctAnswer : string = row.querySelector(".correct>select>option:checked")?.textContent ?? undefined;
                     let incorrectAnswer : string = row.querySelector(".incorrect>select>option:checked")?.textContent ?? undefined;
 
-                    matchAnswer.answers.push({
-                        text: answerText,
+                    matchAnswer.answers[answerText] = {
                         correctAnswer: correctAnswer,
                         incorrectAnswers: incorrectAnswer ? new Array(incorrectAnswer) : []
-                    })
+                    }
                 });
                 return matchAnswer;
 
@@ -33,11 +32,10 @@ export class MatchParser implements IAnswerParser {
                         let answerText : string = row.querySelector(".text").textContent;
                         let answer : string = row.querySelector("select>option:checked")?.textContent ?? undefined;
 
-                        matchAnswer.answers.push({
-                            text: answerText,
+                        matchAnswer.answers[answerText] = {
                             correctAnswer: state == QuestionState.correct ? answer : undefined,
                             incorrectAnswers: state == QuestionState.incorrect ? new Array(answer) : []
-                        })
+                        }
                     })
                 }
                 else {
