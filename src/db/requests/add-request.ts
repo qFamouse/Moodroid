@@ -1,5 +1,5 @@
-import { Command } from "../../core/enums/command"
-import type { Question } from "../../core/models/question";
+import { Command } from "~core/enums/command"
+import type { Question } from "~core/models/question";
 import type { Request } from "./request";
 
 export class AddRequest implements Request {
