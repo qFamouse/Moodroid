@@ -1,6 +1,5 @@
 import type { Question } from "~core/models/question";
 import { ResponseStatus } from "~core/enums/response-status";
-import {squeezeText} from "~core/utils/squeeze-text";
 import type { QuestionsImportStatus } from "~core/types/questions-import-status";
 import type {SuccessResponseWithData} from "~db/responses/success-response-with-data";
 import type { Response } from "~db/responses/response";
@@ -39,14 +38,6 @@ export class QuestionDatabase {
     } else {
       throw error;
     }
-  }
-
-  static generateKey(text : string, images : NodeListOf<HTMLImageElement>) : string {
-    images.forEach(image => {
-      text += (image as HTMLImageElement).src;
-    });
-
-    return squeezeText(text);
   }
 
   static async import(data: string): Promise<QuestionsImportStatus> {
