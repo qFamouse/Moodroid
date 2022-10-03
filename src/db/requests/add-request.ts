@@ -1,6 +1,6 @@
 import { Command } from "~core/enums/command"
 import type { Question } from "~core/models/question";
-import type { IRequest } from "./request";
+import type { IRequest } from "~core/interfaces/request";
 
 export class AddRequest implements IRequest {
     readonly command: Command = Command.Add;

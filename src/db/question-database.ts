@@ -2,7 +2,7 @@ import type { Question } from "~core/models/question";
 import { ResponseStatus } from "~core/enums/response-status";
 import type { QuestionsImportStatus } from "~core/types/questions-import-status";
 import type {SuccessResponseWithData} from "~db/responses/success-response-with-data";
-import type { IResponse } from "~db/responses/response";
+import type { IResponse } from "~core/interfaces/response";
 import {ImportRequest} from "~db/requests/import-request";
 import {ExportRequest} from "~db/requests/export-request";
 import {AddRequest} from "~db/requests/add-request";
