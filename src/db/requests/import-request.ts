@@ -1,9 +1,9 @@
 import { Command } from "~core/enums/command"
-import type { Request } from "./request";
+import type { IRequest } from "./request";
 
-export class ImportRequest implements Request {
+export class ImportRequest implements IRequest {
     readonly command: Command = Command.Import;
 
     constructor(readonly data: string) {
     }
-};
+}

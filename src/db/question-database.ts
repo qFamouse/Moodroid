@@ -2,7 +2,7 @@ import type { Question } from "~core/models/question";
 import { ResponseStatus } from "~core/enums/response-status";
 import type { QuestionsImportStatus } from "~core/types/questions-import-status";
 import type {SuccessResponseWithData} from "~db/responses/success-response-with-data";
-import type { Response } from "~db/responses/response";
+import type { IResponse } from "~db/responses/response";
 import {ImportRequest} from "~db/requests/import-request";
 import {ExportRequest} from "~db/requests/export-request";
 import {AddRequest} from "~db/requests/add-request";
@@ -32,7 +32,7 @@ export function replacer(key, value) {
 
 export class QuestionDatabase {
 
-  private static handleResponseWithData(response: Response, resolve: (value: any) => void, error: Error) {
+  private static handleResponseWithData(response: IResponse, resolve: (value: any) => void, error: Error) {
     if (response.status === ResponseStatus.Success) {
       resolve((response as SuccessResponseWithData).data);
     } else {
@@ -42,7 +42,7 @@ export class QuestionDatabase {
 
   static async import(data: string): Promise<QuestionsImportStatus> {
     return new Promise((onRecieved) => {
-      chrome.runtime.sendMessage(new ImportRequest(data), function(response: Response) {
+      chrome.runtime.sendMessage(new ImportRequest(data), function(response: IResponse) {
         QuestionDatabase.handleResponseWithData(response, onRecieved, new Error("Failed to import questions."));
       });
     });
@@ -50,14 +50,14 @@ export class QuestionDatabase {
 
   static export(): Promise<string> {
     return new Promise((onExported) => {
-      chrome.runtime.sendMessage(new ExportRequest(), function(response: Response) {
+      chrome.runtime.sendMessage(new ExportRequest(), function(response: IResponse) {
         QuestionDatabase.handleResponseWithData(response, onExported, new Error("Failed to export questions."));
       });
     });
   }
 
   static add(key: string, question: Question) {
-    chrome.runtime.sendMessage(new AddRequest(key, question), function(response: Response) {
+    chrome.runtime.sendMessage(new AddRequest(key, question), function(response: IResponse) {
       if (response.status !== ResponseStatus.Success) {
         throw new Error("Failed to add question to database.");
       }
@@ -66,7 +66,7 @@ export class QuestionDatabase {
 
   static async get(key: string): Promise<Question> {
     return new Promise((onRecieved) => {
-      chrome.runtime.sendMessage(new GetRequest(key), function(response: Response) {
+      chrome.runtime.sendMessage(new GetRequest(key), function(response: IResponse) {
         QuestionDatabase.handleResponseWithData(response, onRecieved, new Error("Failed to get question."));
       });
     });
@@ -74,14 +74,14 @@ export class QuestionDatabase {
 
   static async size(): Promise<number> {
     return new Promise((onRecieved) => {
-      chrome.runtime.sendMessage(new SizeRequest(), function(response: Response) {
+      chrome.runtime.sendMessage(new SizeRequest(), function(response: IResponse) {
         QuestionDatabase.handleResponseWithData(response, onRecieved, new Error("Failed to get database size."));
       });
     });
   }
 
   static clear() {
-    chrome.runtime.sendMessage(new ClearRequest(), function(response: Response) {
+    chrome.runtime.sendMessage(new ClearRequest(), function(response: IResponse) {
       if (response.status !== ResponseStatus.Success) {
         throw new Error("Failed to clear database.");
       }

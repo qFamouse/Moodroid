@@ -1,6 +1,6 @@
 import { Command } from "~core/enums/command"
-import type { Request } from "./request";
+import type { IRequest } from "./request";
 
-export class ExportRequest implements Request {
+export class ExportRequest implements IRequest {
     readonly command: Command = Command.Export;
-};
+}
