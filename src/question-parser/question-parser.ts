@@ -10,8 +10,6 @@ import type {QuestionType} from "~models/QuestionType";
 
 export class QuestionParser {
     static parse(que: HTMLElement): Question {
-        if (!QuestionParser.canParse(que)) return;
-
         let type: QuestionType = parseQuestionType(que);
         let text: string = parseQuestionText(que);
         let answer: IAnswer = AnswerParserFactory.getAnswerParser(type)?.parse(que);

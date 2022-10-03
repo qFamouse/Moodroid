@@ -3,44 +3,67 @@ import {QuestionDatabase} from "~utils/QuestionDatabase";
 import {QuizParser} from "~utils/QuizParser";
 import type {Question} from "~models/Question";
 import {isVerifiedUser} from "~utils/isVerifiedUser";
+import {QuestionParser} from "~question-parser/question-parser";
+import {generateQuestionKey} from "~utils/generateQuestionKey";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/review.php*"]
 }
 
 window.addEventListener("load", async () => {
-    if (await isVerifiedUser()) {
-        let ques = document.querySelectorAll('.que') as NodeListOf<HTMLElement>
 
-        if (ques.length != 0) {
-            ques.forEach(que => {
-                let question : Question;
-                if (QuizParser.isCorrectQuestion(que)) {
-                    console.log('Correct question');
-                }
-                else {
-                    // TODO: check feedback to the right answer
-                    console.log('Incorrect question');
-                }
 
-                question = {
-                    text: QuizParser.getQuestionText(que),
-                    type: QuizParser.getQuestionType(que.classList),
-                    correctAnswers: QuizParser.getCorrectAnswers(que),
-                    incorrectAnswers: QuizParser.getIncorrectAnswers(que)
-                }
+    let ques = document.querySelectorAll('.que') as NodeListOf<HTMLElement>;
+    ques.forEach(que => {
+        let question: Question = QuestionParser.parse(que);
 
-                console.log(question);
-
-                QuestionDatabase.add(
-                    QuestionDatabase.generateKey(question.text, QuizParser.getQuestionImages(que)),
-                    question);
-            })
+        if (!question) {
+            console.log("Can't parse");
         }
-        else {
-            console.log(`Couldn't find the right questions`)
+
+        console.log('Correct question', question);
+
+        let key: string = generateQuestionKey(que);
+        if (key && question) {
+            QuestionDatabase.add(key, question);
         }
-    }
+
+    })
+
+
+    // if (await isVerifiedUser()) {
+    //     let ques = document.querySelectorAll('.que') as NodeListOf<HTMLElement>
+    //
+    //     if (ques.length != 0) {
+    //         ques.forEach(que => {
+    //             let question : Question;
+    //             if (QuizParser.isCorrectQuestion(que)) {
+    //                 console.log('Correct question');
+    //             }
+    //             else {
+    //
+    //                 // TODO: check feedback to the right answer
+    //                 console.log('Incorrect question');
+    //             }
+    //
+    //             question = {
+    //                 text: QuizParser.getQuestionText(que),
+    //                 type: QuizParser.getQuestionType(que.classList),
+    //                 correctAnswers: QuizParser.getCorrectAnswers(que),
+    //                 incorrectAnswers: QuizParser.getIncorrectAnswers(que)
+    //             }
+    //
+    //             console.log(question);
+    //
+    //             QuestionDatabase.add(
+    //                 QuestionDatabase.generateKey(question.text, QuizParser.getQuestionImages(que)),
+    //                 question);
+    //         })
+    //     }
+    //     else {
+    //         console.log(`Couldn't find the right questions`)
+    //     }
+    // }
 
 
 
