@@ -1,9 +1,8 @@
 import styles from "./menu.module.css";
 import { useState } from "react";
-import ToggleButton from "~components/toggle-button";
-import StatusBar from "~components/status-bar";
 import {QuestionDatabase} from "~db/question-database";
 import {download} from "~popup/utils/download";
+import StatusBar from "~popup/components/status-bar";
 
 
 

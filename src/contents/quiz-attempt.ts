@@ -6,7 +6,7 @@ import {fillInput} from "~core/utils/fill-Input";
 import {parseQuestionText} from "~core/utils/parse/parse-question-text";
 import {generateQuestionKey} from "~core/utils/generate-question-key";
 import type {IAnswerer} from "~core/interfaces/answerer";
-import {AnswerersFactory} from "~core/answerers/answerers-factory";
+import {AnswerersFactory} from "~core/utils/answerers-factory";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/attempt.php*"]
