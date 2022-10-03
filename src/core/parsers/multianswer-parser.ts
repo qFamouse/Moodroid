@@ -1,8 +1,8 @@
 import type {IAnswerParser} from "~core/interfaces/answer-parser";
 import {MultianswerAnswer} from "~core/models/answers/multianswer-answer";
-import {QuestionState} from "~core/enums/QuestionState";
+import {QuestionState} from "~core/enums/question-state";
 import {parseQuestionState} from "~core/utils/parse/parse-question-state";
-import {QuestionGroup} from "~core/enums/QuestionGroup";
+import {QuestionGroup} from "~core/enums/question-group";
 import {parseQuestionGroup} from "~core/utils/parse/parse-question-group";
 
 export class MultianswerParser implements IAnswerParser {

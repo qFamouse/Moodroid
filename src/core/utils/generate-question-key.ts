@@ -1,5 +1,5 @@
 import {parseQuestionText} from "~core/utils/parse/parse-question-text";
-import {squeezeText} from "~core/utils/squeezeText";
+import {squeezeText} from "~core/utils/squeeze-text";
 
 export function generateQuestionKey(que) : string {
     let text: string = parseQuestionText(que);

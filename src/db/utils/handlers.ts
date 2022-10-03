@@ -1,13 +1,13 @@
-import { Command } from "~core/enums/Command";
-import type { Question } from "~core/models/Question";
-import { replacer, reviver } from "../QuestionDatabase";
+import { Command } from "~core/enums/command";
+import type { Question } from "~core/models/question";
+import { replacer, reviver } from "../question-database";
 import { importQuestionsToLocalStorage, removeAllQuestionsFromLocalStorate, retrieveAllQuestionsFromLocalStorage, retrieveQuestionFromLocalStorage, retrieveQuestionsCountFromLocalStorage, saveQuestionToLocalStorage } from "./storage";
-import type {ImportRequest} from "~db/requests/ImportRequest";
-import {SuccessResponseWithData} from "~db/responses/SuccessResponseWithData";
-import {FailedResponse} from "~db/responses/FailedResponse";
-import {SuccessResponse} from "~db/responses/SuccessResponse";
-import type {AddRequest} from "~db/requests/AddRequest";
-import type {GetRequest} from "~db/requests/GetRequest";
+import type {ImportRequest} from "~db/requests/import-request";
+import {SuccessResponseWithData} from "~db/responses/success-response-with-data";
+import {FailedResponse} from "~db/responses/failed-response";
+import {SuccessResponse} from "~db/responses/success-response";
+import type {AddRequest} from "~db/requests/add-request";
+import type {GetRequest} from "~db/requests/get-request";
 
 /**
  * Handle request: {command: Command.Import, data: "..."}

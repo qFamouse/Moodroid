@@ -1,4 +1,4 @@
-import {QuestionState} from "~core/enums/QuestionState";
+import {QuestionState} from "~core/enums/question-state";
 
 export function parseQuestionState(que: HTMLElement) : QuestionState {
     // Stage 1 - Parse by class names

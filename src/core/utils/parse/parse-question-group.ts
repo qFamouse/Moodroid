@@ -1,4 +1,4 @@
-import {QuestionGroup} from "~core/enums/QuestionGroup";
+import {QuestionGroup} from "~core/enums/question-group";
 
 export function parseQuestionGroup(que: HTMLElement) : QuestionGroup {
     for (let token of que.classList) {

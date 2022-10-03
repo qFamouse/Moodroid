@@ -1,4 +1,4 @@
-import {QuestionType} from "~core/enums/QuestionType";
+import {QuestionType} from "~core/enums/question-type";
 
 export function parseQuestionType(que: HTMLElement) : QuestionType {
     let classList: DOMTokenList = que.classList;

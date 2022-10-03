@@ -1,7 +1,7 @@
-import type { Question } from "~core/models/Question";
-import { QuestionImportStatus } from "~core/enums/QuestionImportStatus";
-import type { QuestionsImportStatus } from "~core/types/QuestionsImportStatus";
-import { reviver } from "../QuestionDatabase";
+import type { Question } from "~core/models/question";
+import { QuestionImportStatus } from "~core/enums/question-import-status";
+import type { QuestionsImportStatus } from "~core/types/questions-import-status";
+import { reviver } from "../question-database";
 
 const localStorageQuestionKeyPrefix: string = "QUESTION_KEY_";
 

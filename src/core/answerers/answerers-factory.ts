@@ -1,4 +1,4 @@
-import {QuestionType} from "~core/enums/QuestionType";
+import {QuestionType} from "~core/enums/question-type";
 import type {IAnswerer} from "~core/interfaces/answerer";
 import {MultichoiceAnswerer} from "~answerers/multichoice-answerer";
 import {MatchAnswerer} from "~answerers/match-answerer";

@@ -1,6 +1,6 @@
-import { Command } from "../../core/enums/Command"
-import type { Question } from "../../core/models/Question";
-import type { Request } from "./Request";
+import { Command } from "../../core/enums/command"
+import type { Question } from "../../core/models/question";
+import type { Request } from "./request";
 
 export class AddRequest implements Request {
     readonly command: Command = Command.Add;

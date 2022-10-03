@@ -1,9 +1,9 @@
 import type {IAnswerParser} from "~core/interfaces/answer-parser";
 import type {MultichoiceAnswer} from "~core/models/answers/multichoice-answer";
 import {parseQuestionGroup} from "~core/utils/parse/parse-question-group";
-import {QuestionGroup} from "~core/enums/QuestionGroup";
+import {QuestionGroup} from "~core/enums/question-group";
 import {parseQuestionState} from "~core/utils/parse/parse-question-state";
-import {QuestionState} from "~core/enums/QuestionState";
+import {QuestionState} from "~core/enums/question-state";
 
 
 export class MultichoiceParser implements IAnswerParser {

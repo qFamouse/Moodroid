@@ -1,5 +1,5 @@
 import type {IAnswerer} from "~core/interfaces/answerer";
-import type {Question} from "~core/models/Question";
+import type {Question} from "~core/models/question";
 import type {MatchAnswer} from "~core/models/answers/match-answer";
 
 export class MatchAnswerer implements IAnswerer {

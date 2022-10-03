@@ -1,11 +1,11 @@
-import {Question} from "~core/models/Question";
+import {Question} from "~core/models/question";
 import {parseQuestionType} from "~core/utils/parse/parse-question-type";
 import {parseQuestionText} from "~core/utils/parse/parse-question-text";
 import type {IAnswer} from "~core/interfaces/answer";
 import {AnswerParserFactory} from "~core/utils/answer-parser-factory";
 import {parseQuestionState} from "~core/utils/parse/parse-question-state";
-import {QuestionState} from "~core/enums/QuestionState";
-import type {QuestionType} from "~core/enums/QuestionType";
+import {QuestionState} from "~core/enums/question-state";
+import type {QuestionType} from "~core/enums/question-type";
 
 
 export class QuestionParser {

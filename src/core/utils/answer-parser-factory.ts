@@ -1,4 +1,4 @@
-import {QuestionType} from "~core/enums/QuestionType";
+import {QuestionType} from "~core/enums/question-type";
 import type {IAnswerParser} from "~core/interfaces/answer-parser";
 import {MultichoiceParser} from "~core/parsers/multichoice-parser";
 import {MatchParser} from "~core/parsers/match-parser";

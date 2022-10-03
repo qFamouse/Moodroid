@@ -1,6 +1,6 @@
 import type {IAnswerParser} from "~core/interfaces/answer-parser";
 import type {ShortanswerAnswer} from "~core/models/answers/shortanswer-answer";
-import {QuestionState} from "~core/enums/QuestionState";
+import {QuestionState} from "~core/enums/question-state";
 import {parseQuestionState} from "~core/utils/parse/parse-question-state";
 
 export class ShortanswerParser implements IAnswerParser {

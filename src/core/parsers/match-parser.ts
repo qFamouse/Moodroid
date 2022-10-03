@@ -1,7 +1,7 @@
 import type {IAnswerParser} from "~core/interfaces/answer-parser";
-import {QuestionGroup} from "~core/enums/QuestionGroup";
+import {QuestionGroup} from "~core/enums/question-group";
 import {parseQuestionGroup} from "~core/utils/parse/parse-question-group";
-import {QuestionState} from "~core/enums/QuestionState";
+import {QuestionState} from "~core/enums/question-state";
 import {parseQuestionState} from "~core/utils/parse/parse-question-state";
 import {MatchAnswer} from "~core/models/answers/match-answer";
 

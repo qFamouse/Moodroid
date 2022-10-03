@@ -1,5 +1,5 @@
-import type { Response } from "./Response";
-import { ResponseStatus } from "../../core/enums/ResponseStatus";
+import type { Response } from "./response";
+import { ResponseStatus } from "../../core/enums/response-status";
 
 export class SuccessResponse implements Response {
     readonly status: ResponseStatus = ResponseStatus.Success;

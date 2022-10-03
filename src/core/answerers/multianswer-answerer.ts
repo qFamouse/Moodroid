@@ -1,5 +1,5 @@
 import type {IAnswerer} from "~core/interfaces/answerer";
-import type {Question} from "~core/models/Question";
+import type {Question} from "~core/models/question";
 import type {MultianswerAnswer} from "~core/models/answers/multianswer-answer";
 
 export class MultianswerAnswerer implements IAnswerer {

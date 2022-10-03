@@ -1,10 +1,10 @@
 import type {PlasmoContentScript} from "plasmo"
-import {squeezeText} from "~core/utils/squeezeText";
-import {QuestionDatabase} from "~db/QuestionDatabase";
-import {QuestionType} from "~core/enums/QuestionType";
-import {fillInput} from "~core/utils/fillInput";
+import {squeezeText} from "~core/utils/squeeze-text";
+import {QuestionDatabase} from "~db/question-database";
+import {QuestionType} from "~core/enums/question-type";
+import {fillInput} from "~core/utils/fill-Input";
 import {parseQuestionText} from "~core/utils/parse/parse-question-text";
-import {generateQuestionKey} from "~core/utils/generateQuestionKey";
+import {generateQuestionKey} from "~core/utils/generate-question-key";
 import type {IAnswerer} from "~core/interfaces/answerer";
 import {AnswerersFactory} from "~core/answerers/answerers-factory";
 

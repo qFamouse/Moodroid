@@ -1,6 +1,6 @@
 import type {IAnswerParser} from "~core/interfaces/answer-parser";
 import type {EssayAnswer} from "~core/models/answers/essay-answer";
-import {QuestionState} from "~core/enums/QuestionState";
+import {QuestionState} from "~core/enums/question-state";
 import {parseQuestionState} from "~core/utils/parse/parse-question-state";
 
 export class EssayParser implements IAnswerParser {
