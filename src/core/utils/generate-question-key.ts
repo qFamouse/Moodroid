@@ -1,5 +1,4 @@
 import {parseQuestionText} from "~core/utils/parse/parse-question-text";
-import {squeezeText} from "~core/utils/squeeze-text";
 
 export function generateQuestionKey(que) : string {
     let text: string = parseQuestionText(que);
@@ -9,5 +8,11 @@ export function generateQuestionKey(que) : string {
     //     text += image.src;
     // });
 
-    return squeezeText(text);
+    // remove whitespaces
+    text = text.replace(/\s+/g, "");
+
+    // lowercase
+    text = text.toLowerCase();
+
+    return text;
 }
