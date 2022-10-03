@@ -1,10 +1,8 @@
 import type {PlasmoContentScript} from "plasmo"
-import {QuestionDatabase} from "~utils/QuestionDatabase";
-import {QuizParser} from "~utils/QuizParser";
-import type {Question} from "~models/Question";
-import {isVerifiedUser} from "~utils/isVerifiedUser";
-import {QuestionParser} from "~question-parser/question-parser";
-import {generateQuestionKey} from "~utils/generateQuestionKey";
+import {QuestionDatabase} from "~db/QuestionDatabase";
+import type {Question} from "~core/models/Question";
+import {QuestionParser} from "~core/parsers/question-parser";
+import {generateQuestionKey} from "~core/utils/generateQuestionKey";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/review.php*"]

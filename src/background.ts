@@ -1,5 +1,5 @@
-import { handleAdd, handleClear, handleExport, handleGet, handleImport, handleSize } from "~utils/handlers";
-import { loadDatabaseAsset } from "~utils/storage";
+import { handleAdd, handleClear, handleExport, handleGet, handleImport, handleSize } from "~db/utils/handlers";
+import { loadDatabaseAsset } from "~db/utils/storage";
 
 export {}
 

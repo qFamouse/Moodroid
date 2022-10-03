@@ -1,4 +1,4 @@
-import { Menu } from "~components/menu";
+import { Menu } from "~popup/components/menu";
 
 function IndexPopup() {
   return (

@@ -1,14 +1,12 @@
 import type {PlasmoContentScript} from "plasmo"
-import {QuizParser} from "~utils/QuizParser";
-import {squeezeText} from "~utils/squeezeText";
-import {QuestionDatabase} from "~utils/QuestionDatabase";
-import {QuestionType} from "~models/QuestionType";
-import {isVerifiedUser} from "~utils/isVerifiedUser";
-import {fillInput} from "~utils/fillInput";
-import {parseQuestionText} from "~question-parser/shared/parse-question-text";
-import {generateQuestionKey} from "~utils/generateQuestionKey";
+import {squeezeText} from "~core/utils/squeezeText";
+import {QuestionDatabase} from "~db/QuestionDatabase";
+import {QuestionType} from "~core/enums/QuestionType";
+import {fillInput} from "~core/utils/fillInput";
+import {parseQuestionText} from "~core/utils/parse/parse-question-text";
+import {generateQuestionKey} from "~core/utils/generateQuestionKey";
 import type {IAnswerer} from "~core/interfaces/answerer";
-import {AnswerersFactory} from "~answerers/answerers-factory";
+import {AnswerersFactory} from "~core/answerers/answerers-factory";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/attempt.php*"]
