@@ -20,6 +20,8 @@ window.addEventListener("load", async () => {
                 return;
             }
 
+            console.log('Parsed question', question);
+
             let key = generateQuestionKey(que);
             QuestionDatabase.add(key, question);
         }
