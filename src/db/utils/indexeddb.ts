@@ -179,9 +179,9 @@ export async function retrieveQuestionsCount(): Promise<number> {
       }
 
       let store = tx.objectStore(storeName);
-      let request: IDBRequest = store.getAllKeys();
+      let request: IDBRequest = store.count();
       request.onsuccess = function(event: any) {       
-        count = event.target.result.length;
+        count = event.target.result;
       }
     })
     .catch(function(reason) {
