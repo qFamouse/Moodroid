@@ -1,4 +1,5 @@
 import type {IAnswer} from "~core/interfaces/answer";
+import type {QuestionState} from "~core/enums/question-state";
 
 export class MatchAnswer implements IAnswer {
     public answers : {
@@ -7,4 +8,5 @@ export class MatchAnswer implements IAnswer {
             incorrectAnswers : string[]
         }
     } = {}
+    public state: QuestionState;
 }

@@ -14,7 +14,8 @@ export class ShortanswerParser implements IAnswerParser {
         let input : HTMLInputElement = que.querySelector(".answer>input");
 
         return {
-            answer: input.value
+            answer: input.value,
+            state: state
         }
     }
 }

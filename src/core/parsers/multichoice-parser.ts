@@ -8,15 +8,21 @@ import {QuestionState} from "~core/enums/question-state";
 
 export class MultichoiceParser implements IAnswerParser {
     parse(que: HTMLElement): MultichoiceAnswer {
+        let group : QuestionGroup = parseQuestionGroup(que);
+        let state : QuestionState = parseQuestionState(que);
+
+        if (group == QuestionGroup.complete && state == QuestionState.partiallycorrect) {
+            throw new Error("Can't parse complete question in partiallycorrect state");
+        }
+
         return {
-            correctAnswers: MultichoiceParser.parseAnswers(que, true),
-            incorrectAnswers: MultichoiceParser.parseAnswers(que, false)
+            correctAnswers: MultichoiceParser.parseAnswers(que, group, state, true),
+            incorrectAnswers: MultichoiceParser.parseAnswers(que, group, state,false),
+            state: state
         }
     }
 
-    private static parseAnswers(que : HTMLElement, parseCorrect : boolean) : string[] {
-        let group : QuestionGroup = parseQuestionGroup(que);
-        let state : QuestionState = parseQuestionState(que);
+    private static parseAnswers(que : HTMLElement, group: QuestionGroup, state : QuestionState, parseCorrect : boolean) : string[] {
         let answerLabels : NodeListOf<HTMLElement>;
 
         // Collecting answers

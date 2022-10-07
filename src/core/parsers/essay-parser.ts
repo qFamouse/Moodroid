@@ -14,7 +14,8 @@ export class EssayParser implements IAnswerParser {
         let answer : HTMLElement = que.querySelector(".answer");
 
         return {
-            answer: answer.textContent
+            answer: answer.textContent,
+            state: state
         }
     }
 }

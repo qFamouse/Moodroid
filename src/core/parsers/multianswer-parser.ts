@@ -11,15 +11,17 @@ export class MultianswerParser implements IAnswerParser {
         let group : QuestionGroup = parseQuestionGroup(que);
 
         if (state != QuestionState.correct && state != QuestionState.partiallycorrect) {
-            throw new Error("Save only the correct answers");
+            throw new Error("Save only the correct/partiallycorrect answers");
         }
 
         let answerContainer : HTMLElement = que.querySelector("input[type=hidden]+p+p");
         let inputs : NodeListOf<HTMLInputElement> = answerContainer.querySelectorAll("input")
         let multianswerAnswer = new MultianswerAnswer()
+        multianswerAnswer.state = state;
 
         switch (group) {
             case QuestionGroup.correctIncorrect:
+
                 inputs.forEach(input => {
                     let answerCheckIcon = input.nextSibling as HTMLElement;
                     if (answerCheckIcon.classList.contains("text-success")) {
@@ -36,6 +38,9 @@ export class MultianswerParser implements IAnswerParser {
                     inputs.forEach(input => {
                         multianswerAnswer.answers.push(input.value);
                     })
+                }
+                else {
+                    throw new Error("Can't save partiallycorrect answer in complete question")
                 }
                 return multianswerAnswer;
         }

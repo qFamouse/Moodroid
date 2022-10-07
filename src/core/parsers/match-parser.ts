@@ -9,7 +9,10 @@ export class MatchParser implements IAnswerParser {
     parse(que: HTMLElement) : MatchAnswer {
         let group : QuestionGroup = parseQuestionGroup(que);
         let rows : NodeListOf<HTMLElement> = que.querySelectorAll("tbody>[class^=r]");
+        let state : QuestionState = parseQuestionState(que);
+
         let matchAnswer : MatchAnswer = new MatchAnswer();
+        matchAnswer.state = state;
 
         switch (group) {
             case QuestionGroup.correctIncorrect:
@@ -26,7 +29,7 @@ export class MatchParser implements IAnswerParser {
                 return matchAnswer;
 
             case QuestionGroup.complete:
-                let state = parseQuestionState(que);
+                // let state = parseQuestionState(que);
                 if (state == QuestionState.correct || state == QuestionState.incorrect) {
                     rows.forEach(row => {
                         let answerText : string = row.querySelector(".text").textContent;

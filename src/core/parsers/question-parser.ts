@@ -10,6 +10,8 @@ import type {QuestionType} from "~core/enums/question-type";
 
 export class QuestionParser {
     static parse(que: HTMLElement): Question {
+        if (!this.canParse(que)) throw new Error("Can't parse this question state: " + parseQuestionState(que))
+
         let type: QuestionType = parseQuestionType(que);
         let text: string = parseQuestionText(que);
         let answer: IAnswer = AnswerParserFactory.getAnswerParser(type)?.parse(que);
@@ -22,6 +24,7 @@ export class QuestionParser {
     private static canParse(que: HTMLElement): boolean {
         let state: QuestionState = parseQuestionState(que);
         return state === QuestionState.correct
-            || state === QuestionState.partiallycorrect;
+            || state === QuestionState.partiallycorrect
+            || state === QuestionState.incorrect;
     }
 }
