@@ -41,9 +41,9 @@ export class QuestionDatabase {
   }
 
   static async import(data: string): Promise<QuestionsImportStatus> {
-    return new Promise((onRecieved) => {
+    return new Promise((onReceived) => {
       chrome.runtime.sendMessage(new ImportRequest(data), function(response: IResponse) {
-        QuestionDatabase.handleResponseWithData(response, onRecieved, new Error("Failed to import questions."));
+        QuestionDatabase.handleResponseWithData(response, onReceived, new Error("Failed to import questions."));
       });
     });
   }
@@ -65,17 +65,17 @@ export class QuestionDatabase {
   }
 
   static async get(key: string): Promise<Question> {
-    return new Promise((onRecieved) => {
+    return new Promise((onReceived) => {
       chrome.runtime.sendMessage(new GetRequest(key), function(response: IResponse) {
-        QuestionDatabase.handleResponseWithData(response, onRecieved, new Error("Failed to get question."));
+        QuestionDatabase.handleResponseWithData(response, onReceived, new Error("Failed to get question."));
       });
     });
   }
 
   static async size(): Promise<number> {
-    return new Promise((onRecieved) => {
+    return new Promise((onReceived) => {
       chrome.runtime.sendMessage(new SizeRequest(), function(response: IResponse) {
-        QuestionDatabase.handleResponseWithData(response, onRecieved, new Error("Failed to get database size."));
+        QuestionDatabase.handleResponseWithData(response, onReceived, new Error("Failed to get database size."));
       });
     });
   }
