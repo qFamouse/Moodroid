@@ -1,6 +1,11 @@
 import { QuestionImportStatus } from "~core/enums/question-import-status";
-import type { Question } from "~core/models/question";
+import { QuestionState } from "~core/enums/question-state";
+import type { QuestionType } from "~core/enums/question-type";
+import type { IAnswer } from "~core/interfaces/answer";
+import type { IAnswerMerger } from "~core/interfaces/answer-merger";
+import { Question } from "~core/models/question";
 import type { QuestionsImportStatus } from "~core/types/questions-import-status";
+import { AnswerMergerFactory } from "./import/answer-merger-factory";
 
 declare type Document = {
   key: string,
@@ -53,30 +58,65 @@ function createReadWriteTransaction(db: IDBDatabase): IDBTransaction {
 
 export async function importQuestion(questionToImport: Question, questionKey: string): Promise<QuestionImportStatus> {
   return new Promise((onImported) => {
-    retrieveQuestion(questionKey).then(function(questionInDb) {
-      if (questionInDb) {
-        if (questionInDb.type !== questionToImport.type) {
-          throw new Error(`Can't import question with key "${questionKey}": \
-            types (${questionInDb.type}, ${questionToImport.type}) are not equal`);
-        }
-
-        // TODO: implement import
-  
-        saveQuestion(questionKey, questionInDb).then(function() {
-          onImported(QuestionImportStatus.Merged);
-        });
-      } else {
+    switch (questionToImport.answer.state) {
+      case QuestionState.correct:
         saveQuestion(questionKey, questionToImport).then(function() {
-          onImported(QuestionImportStatus.Added);
+          onImported(QuestionImportStatus.Overwritten);
         });
-      }
-    });
+        break;
+      case QuestionState.partiallycorrect:
+        retrieveQuestion(questionKey).then(function(questionInDb) {
+          if (questionInDb) {
+            if (questionInDb.type !== questionToImport.type) {
+              throw new Error(`Can't import question with key "${questionKey}": \
+                types (${questionInDb.type}, ${questionToImport.type}) are not equal`);
+            }
+    
+            switch (questionInDb.answer.state) {
+              case QuestionState.correct:
+                onImported(QuestionImportStatus.Ignored);
+                break;
+              case QuestionState.incorrect:
+                saveQuestion(questionKey, questionToImport).then(function() {
+                  onImported(QuestionImportStatus.Added);
+                });
+                break;
+              case QuestionState.partiallycorrect:
+                let type: QuestionType = questionToImport.type;
+                let text: string = questionToImport.text;
+                let merger: IAnswerMerger = AnswerMergerFactory.getAnswerMerger(type);
+
+                if (!merger) {
+                  throw new Error(`Can't import question with key "${questionKey}": \
+                    no answer merger found (${questionInDb.answer.state}, ${questionToImport.answer.state})`);
+                }
+                
+                let mergedAnswer: IAnswer = merger.merge(questionInDb.answer, questionToImport.answer);
+
+                saveQuestion(questionKey, new Question(text, type, mergedAnswer)).then(function() {
+                  onImported(QuestionImportStatus.Merged);
+                });
+                break;
+              default:
+                throw new Error(`Can't import question with key "${questionKey}": \
+                  question states (${questionInDb.answer.state}, ${questionToImport.answer.state})`);
+            }
+          } else {
+            saveQuestion(questionKey, questionToImport).then(function() {
+              onImported(QuestionImportStatus.Added);
+            });
+          }
+        });
+        break;
+      default: 
+        onImported(QuestionImportStatus.Ignored);
+    }
   });
 }
 
 export async function importQuestions(newQuestions: Map<string, Question>): Promise<QuestionsImportStatus> {
   let importStatuses: Promise<QuestionImportStatus>[] = [];
-  let status: QuestionsImportStatus = {added: 0, merged: 0, failed: 0};
+  let status: QuestionsImportStatus = {added: 0, merged: 0, failed: 0, ignored: 0, overwritten: 0};
 
   newQuestions.forEach(function(questionToImport: Question, questionKey: string) {
     importStatuses.push(importQuestion(questionToImport, questionKey));
@@ -91,6 +131,12 @@ export async function importQuestions(newQuestions: Map<string, Question>): Prom
               break;
             case QuestionImportStatus.Merged:
               status.merged++;
+              break;
+            case QuestionImportStatus.Ignored:
+              status.ignored++;
+              break;
+            case QuestionImportStatus.Overwritten:
+              status.overwritten++;
               break;
           }
         } else {
