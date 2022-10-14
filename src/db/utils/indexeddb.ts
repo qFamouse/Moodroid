@@ -7,12 +7,21 @@ declare type Document = {
   question: Question
 };
 
+class Cache {
+  static database: IDBDatabase;
+}
+
 const databaseName: string = "QuestionsDB";
 const storeName: string = "QuestionsStore";
 
 function openDatabase(): Promise<IDBDatabase> {
   return new Promise((onOpened, reject) => {
     let db: IDBDatabase;
+
+    if (db = Cache.database) {
+      onOpened(db);
+    }
+
     const openRequest: IDBOpenDBRequest = indexedDB.open(databaseName);
     openRequest.onerror = function(reason) {
       reject(reason);
