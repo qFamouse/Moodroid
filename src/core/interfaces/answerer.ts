@@ -1,5 +1,7 @@
 import type {Question} from "~core/models/question";
 
 export interface IAnswerer {
-    answer(que : HTMLElement, question : Question)
+    toExam(que : HTMLElement, question : Question);
+    toAdventure(que : HTMLElement, question : Question);
+    toHack(que : HTMLElement, question : Question);
 }
