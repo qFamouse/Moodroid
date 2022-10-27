@@ -40,11 +40,11 @@ window.addEventListener("load", async () => {
 
             try {
                 switch (currentExtensionMode) {
-                    case ExtensionMode.exam: answerer.toExam(que, question);
+                    case ExtensionMode.exam: answerer.exam(que, question);
                         break;
-                    case ExtensionMode.hack: answerer.toHack(que, question);
+                    case ExtensionMode.hack: answerer.hack(que, question);
                         break;
-                    case ExtensionMode.adventure: answerer.toAdventure(que, question);
+                    case ExtensionMode.adventure: answerer.adventure(que, question);
                         break;
                     default:
                         console.warn("Unsupported extension mode", i)

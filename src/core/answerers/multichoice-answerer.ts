@@ -35,7 +35,7 @@ export class MultichoiceAnswerer implements IAnswerer {
         })
     }
 
-    public toHack(que: HTMLElement, question: Question) : void {
+    public hack(que: HTMLElement, question: Question) : void {
         let correctAction : IMultichoiceAction = (input : HTMLInputElement, answerLabel : HTMLElement) => {
             input.checked = true;
         }
@@ -43,7 +43,7 @@ export class MultichoiceAnswerer implements IAnswerer {
         this.enumerator(que, question, correctAction);
     }
 
-    public toAdventure(que: HTMLElement, question: Question) : void {
+    public adventure(que: HTMLElement, question: Question) : void {
         let correctAction : IMultichoiceAction = (input : HTMLInputElement, answerLabel : HTMLElement) => {
             answerLabel.style.color = "#fff800"
             answerLabel.style.background = "#3aa83a"
@@ -57,7 +57,7 @@ export class MultichoiceAnswerer implements IAnswerer {
         this.enumerator(que, question, correctAction, incorrectAction)
     }
 
-    public toExam(que: HTMLElement, question: Question) : void {
+    public exam(que: HTMLElement, question: Question) : void {
         // Adding html point for advises
         let createStatusPoint = () : HTMLElement => {
             let statusPoint : HTMLElement = document.createElement('div');

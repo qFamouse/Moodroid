@@ -41,7 +41,7 @@ export class MatchAnswerer implements IAnswerer {
         });
     }
 
-    toAdventure(que: HTMLElement, question: Question) {
+    adventure(que: HTMLElement, question: Question) {
         let correctAction : IMatchAction = (option : HTMLOptionElement) => {
             option.style.color = "#fff800";
             option.style.background = "#3aa83a";
@@ -55,7 +55,7 @@ export class MatchAnswerer implements IAnswerer {
         this.enumerator(que, question, correctAction, incorrectAction)
     }
 
-    toExam(que: HTMLElement, question: Question) {
+    exam(que: HTMLElement, question: Question) {
         let correctAction : IMatchAction = (option : HTMLOptionElement) => {
             option.style.fontStyle = "italic";
         }
@@ -63,7 +63,7 @@ export class MatchAnswerer implements IAnswerer {
         this.enumerator(que, question, correctAction)
     }
 
-    toHack(que: HTMLElement, question: Question) {
+    hack(que: HTMLElement, question: Question) {
         let correctAction : IMatchAction = (option : HTMLOptionElement) => {
             option.selected = true;
         }
