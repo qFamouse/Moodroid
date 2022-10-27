@@ -13,9 +13,10 @@ export const config: PlasmoContentScript = {
 window.addEventListener("load", async () => {
     // TODO: for production set window.localStorage to chrome.storage.local
     // TODO: adding provider for extension mode
-    let currentExtensionMode : ExtensionMode = window.localStorage[modsCfg.localStorageKey] ?? modsCfg.defaultMode
+    let currentExtensionMode : ExtensionMode = window.localStorage[modsCfg.localStorageKey] || ExtensionMode.adventure //modsCfg.defaultMode
 
     if (!(currentExtensionMode in ExtensionMode)) {
+        console.log("Disabled mode", currentExtensionMode)
         return
     }
 
