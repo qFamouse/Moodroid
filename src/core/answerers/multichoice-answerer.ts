@@ -14,7 +14,7 @@ export class MultichoiceAnswerer implements IAnswerer {
         correctAction: IMultichoiceAction = () => {},
         incorrectAction: IMultichoiceAction = () => {}
     ) : void {
-        let answer = Object.assign({}, question.answer) as MultichoiceAnswer;
+        let answer = question.answer as MultichoiceAnswer;
         let rows = que.querySelectorAll(".answer>[class^=r]");
 
         rows.forEach(row => {
@@ -24,14 +24,12 @@ export class MultichoiceAnswerer implements IAnswerer {
             let index = answer.correctAnswers.indexOf(answerLabel.textContent);
             if (index >= 0) {
                 correctAction(input, answerLabel)
-                answer.correctAnswers.splice(index, 1);
                 return;
             }
 
             index = answer.incorrectAnswers.indexOf(answerLabel.textContent);
             if (index >= 0) {
                 incorrectAction(input, answerLabel)
-                answer.incorrectAnswers.splice(index, 1);
                 return;
             }
         })
@@ -42,7 +40,7 @@ export class MultichoiceAnswerer implements IAnswerer {
             input.checked = true;
         }
 
-        this.enumerator(que, question, correctAction)
+        this.enumerator(que, question, correctAction);
     }
 
     public toAdventure(que: HTMLElement, question: Question) : void {
