@@ -1,3 +1,4 @@
 {
-  "localStorageKey": "extension_mode"
+  "localStorageKey": "extension_mode",
+  "defaultMode": "exam"
 }
