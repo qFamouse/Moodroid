@@ -1,12 +1,12 @@
-import type {IAnswer} from "~core/interfaces/answer";
-import type {QuestionState} from "~core/enums/question-state";
+import type { QuestionState } from "~core/enums/question-state"
+import type { IAnswer } from "~core/interfaces/answer"
 
 export class MultianswerAnswer implements IAnswer {
-    public answers : string[]
+    public answers: string[]
 
     constructor() {
-        this.answers = [];
+        this.answers = []
     }
 
-    public state: QuestionState;
+    public state: QuestionState
 }

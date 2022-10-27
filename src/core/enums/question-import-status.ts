@@ -1,6 +1,6 @@
 export enum QuestionImportStatus {
-    Added  = "added",
+    Added = "added",
     Merged = "merged",
     Ignored = "ignored",
-    Overwritten = "overwritten",
+    Overwritten = "overwritten"
 }
