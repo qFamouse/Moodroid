@@ -1,0 +1,88 @@
+
+.material-icons {
+    font-family: 'Times New Roman';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+	font-size: 1rem;
+	background-color: #ebebeb;
+	padding: 20px;
+	text-align: center;
+}
+
+h1 {
+	font-weight: 100;
+	color: #777;
+}
+
+i.material-icons {
+	font-size: 1.5rem;
+	color: white;
+	position: relative;
+	border-radius: 50%;
+	padding: 5px 10px;
+	margin: 3px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+	transition: color 0.2s ease, background-color 0.2s ease, transform 0.3s ease;
+}
+
+i.material-icons:after {
+	content: "";
+	width: 100%;
+	height: 100%;
+	border: solid 2px;
+	transform: scale(0.8);
+	position: absolute;
+	top: -2px;
+	left: -2px;
+	border-radius: 50%;
+	transition: all 0.3s ease;
+}
+
+i.material-icons:hover:after {
+	transform: scale(1);
+	box-shadow: 10px 0 20px rgba(0, 0, 0, 0.19), 6px 0 6px rgba(0, 0, 0, 0.23);
+}
+
+i.material-icons {
+	background-color: #d59acb;
+}
+
+i.material-icons:hover {
+	color: #d59acb;
+}
+
+i.material-icons:after {
+	border-color: #d59acb;
+}
+
+i.material-icons {
+	background-color: #cd8484;
+}
+
+i.material-icons:hover {
+	color: #cd8484;
+}
+
+i.material-icons:after {
+	border-color: #cd8484;
+}
+
+i.material-icons:hover {
+	background-color: transparent;
+	transform: rotate(90deg);
+	cursor: pointer;
+	box-shadow: none;
+}

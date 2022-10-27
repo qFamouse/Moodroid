@@ -1,0 +1,77 @@
+@import '../../styles/constants.scss';
+@import '../../styles/utils.scss';
+
+.toggle {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle__label {
+  @include font($main-font, 600, 12px);
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none; 
+  -khtml-user-select: none; 
+  -moz-user-select: none; 
+  -ms-user-select: none; 
+  user-select: none; 
+}
+
+/* switch styles from w3schools */
+.toggle__switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 14px;
+  }
+  
+  /* Hide default HTML checkbox */
+  .toggle__switch .toggle__input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* The slider */
+  .toggle__slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: $inactive-color;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 17px;
+  }
+  
+  .toggle__slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: -12px;
+    bottom: -5px;
+    background-color: $main-color;
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 50%;
+    border: 2px solid $inactive-color
+  }
+  
+  .toggle__input:checked + .toggle__slider {
+    background-color: $second-color;
+  }
+  
+  .toggle__input:focus + .toggle__slider {
+    box-shadow: 0 0 1px $second-color;
+  }
+  
+  .toggle__input:checked + .toggle__slider:before {
+    -webkit-transform: translateX(50px);
+    -ms-transform: translateX(50px);
+    transform: translateX(50px);
+    border: 2px solid $second-color;
+  }

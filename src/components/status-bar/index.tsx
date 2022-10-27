@@ -1,4 +1,4 @@
-import styles from './status-bar.module.css';
+import styles from './status-bar.module.scss';
 
 interface IStatusBarRequiredProps {
 

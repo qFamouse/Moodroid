@@ -1,0 +1,127 @@
+@import '../../styles/constants.scss';
+@import '../../styles/utils.scss';
+
+$menu-horizontal-padding: 12px; 
+$menu-margin: 8px;
+
+:global(body) {
+    background: none;
+    margin: $menu-margin
+}
+
+.menu {
+    border-radius: 20%;
+    display: flex;
+    flex-direction: column;
+    padding: 0px $menu-horizontal-padding;
+    gap: 10px;
+
+    width: 200px;
+    border-radius: 20%;
+
+    &__hide {
+        @include font($main-font, 700, 24px);
+        margin-left: -($menu-horizontal-padding + $menu-margin) + 1px;
+        margin-right: -($menu-horizontal-padding + $menu-margin);
+        margin-bottom: -$menu-margin;
+        text-transform: uppercase;
+    }
+
+    &__statusbar {
+        margin: 0px (-$menu-horizontal-padding - $menu-margin);
+    }
+}
+
+.button {
+    @include font($main-font, 600, 16px);
+    padding: 6px 12px;
+    background-color: $main-color;
+    color: white;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    justify-content: center;
+
+    &_no_border_radius {
+        border-radius: 0px;
+    }
+
+    &__ico {
+        width: 15px;
+        height: 15px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        display: inline-block;
+    
+        &_import {
+            background-image: url(/assets/import.png);
+        }
+
+        &_export {
+            background-image: url(/assets/export.png);
+        }
+    }
+
+    
+}
+
+.button:hover {
+    cursor: pointer;
+    background-color: $second-color;
+}
+
+.button:active {
+    background-color: $main-color;
+    border: 1px solid $second-color
+}
+
+.database {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    &__hint {
+        color: $hints-color;
+        @include font($main-font, 400, 10px);
+    }
+
+    &__records {
+        line-height: 22px;
+        text-align: center;
+        @include font($main-font, 600, 24px);
+        span {
+            color: $hints-color
+        }
+    }
+
+    &__buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    &__hint {
+        color: $hints-color;
+        @include font($main-font, 400, 10px);
+    }
+
+    &__toggle {
+        margin: -2px (-($menu-horizontal-padding + $menu-margin));
+        padding: 4px ($menu-horizontal-padding + $menu-margin);
+        background: rgba($second-color, .10);
+    }
+
+    &__toggle_inactive {
+        background: rgba($main-color, .10);
+    }
+}
