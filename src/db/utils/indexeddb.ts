@@ -205,7 +205,7 @@ export async function retrieveQuestion(questionKey: string): Promise<Question> {
       let store: IDBObjectStore = tx.objectStore(storeName);
       let request: IDBRequest = store.get(questionKey);
       request.onsuccess = function(event: any) {
-        question = event.target.result.question;
+        question = event.target.result?.question;
       }      
     })
     .catch(function(reason) {
