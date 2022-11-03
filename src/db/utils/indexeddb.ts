@@ -56,13 +56,12 @@ function createReadWriteTransaction(db: IDBDatabase): IDBTransaction {
   return createTransaction(db, "readwrite");
 }
 
-export async function importQuestion(questionToImport: Question, questionKey: string): Promise<QuestionImportStatus> {
-  return new Promise((onImported) => {
+export async function predictQuestionImportStatus(questionToImport: Question, questionKey: string, questions?: Document[]): Promise<QuestionImportStatus> {
+  return new Promise((resolve) => {
     switch (questionToImport.answer.state) {
       case QuestionState.correct:
-        saveQuestion(questionKey, questionToImport).then(function() {
-          onImported(QuestionImportStatus.Overwritten);
-        });
+        questions?.push({key: questionKey, question: questionToImport});
+        resolve(QuestionImportStatus.Overwritten);
         break;
       case QuestionState.partiallycorrect:
         retrieveQuestion(questionKey).then(function(questionInDb) {
@@ -74,12 +73,11 @@ export async function importQuestion(questionToImport: Question, questionKey: st
     
             switch (questionInDb.answer.state) {
               case QuestionState.correct:
-                onImported(QuestionImportStatus.Ignored);
+                resolve(QuestionImportStatus.Ignored);
                 break;
               case QuestionState.incorrect:
-                saveQuestion(questionKey, questionToImport).then(function() {
-                  onImported(QuestionImportStatus.Added);
-                });
+                questions?.push({key: questionKey, question: questionToImport});
+                resolve(QuestionImportStatus.Added);
                 break;
               case QuestionState.partiallycorrect:
                 let type: QuestionType = questionToImport.type;
@@ -93,57 +91,58 @@ export async function importQuestion(questionToImport: Question, questionKey: st
                 
                 let mergedAnswer: IAnswer = merger.merge(questionInDb.answer, questionToImport.answer);
 
-                saveQuestion(questionKey, new Question(text, type, mergedAnswer)).then(function() {
-                  onImported(QuestionImportStatus.Merged);
-                });
+                questions?.push({key: questionKey, question: new Question(text, type, mergedAnswer)});
+                resolve(QuestionImportStatus.Merged);
                 break;
               default:
                 throw new Error(`Can't import question with key "${questionKey}": \
                   question states (${questionInDb.answer.state}, ${questionToImport.answer.state})`);
             }
           } else {
-            saveQuestion(questionKey, questionToImport).then(function() {
-              onImported(QuestionImportStatus.Added);
-            });
+            questions?.push({key: questionKey, question: questionToImport});
+            resolve(QuestionImportStatus.Added);
           }
         });
         break;
-      default: 
-        onImported(QuestionImportStatus.Ignored);
+      default:
+        resolve(QuestionImportStatus.Ignored);
     }
   });
 }
 
 export async function importQuestions(newQuestions: Map<string, Question>): Promise<QuestionsImportStatus> {
   let importStatuses: Promise<QuestionImportStatus>[] = [];
+  let questionsToSave: Document[] = [];
   let status: QuestionsImportStatus = {added: 0, merged: 0, failed: 0, ignored: 0, overwritten: 0};
 
   newQuestions.forEach(function(questionToImport: Question, questionKey: string) {
-    importStatuses.push(importQuestion(questionToImport, questionKey));
+    importStatuses.push(predictQuestionImportStatus(questionToImport, questionKey, questionsToSave));
   });
   return new Promise((onImported) => {
     Promise.allSettled(importStatuses).then((promiseResults) => {
-      promiseResults.forEach(function(promiseResult) {
-        if (promiseResult.status === "fulfilled") {
-          switch (promiseResult.value) {
-            case QuestionImportStatus.Added:
-              status.added++;
-              break;
-            case QuestionImportStatus.Merged:
-              status.merged++;
-              break;
-            case QuestionImportStatus.Ignored:
-              status.ignored++;
-              break;
-            case QuestionImportStatus.Overwritten:
-              status.overwritten++;
-              break;
+      saveQuestions(questionsToSave).then(() => {
+        promiseResults.forEach(function(promiseResult) {
+          if (promiseResult.status === "fulfilled") {
+            switch (promiseResult.value) {
+              case QuestionImportStatus.Added:
+                status.added++;
+                break;
+              case QuestionImportStatus.Merged:
+                status.merged++;
+                break;
+              case QuestionImportStatus.Ignored:
+                status.ignored++;
+                break;
+              case QuestionImportStatus.Overwritten:
+                status.overwritten++;
+                break;
+            }
+          } else {
+            status.failed++;
           }
-        } else {
-          status.failed++;
-        }
+          onImported(status);
+        });
       });
-      onImported(status);
     });
   });
 }
@@ -162,6 +161,27 @@ export async function saveQuestion(questionKey: string, question: Question): Pro
 
       let store: IDBObjectStore = tx.objectStore(storeName);
       store.put({key: questionKey, question: question});
+    })
+    .catch(function(reason) {
+      reject(reason);
+    });
+  });
+};
+
+export async function saveQuestions(questions: Document[]): Promise<void> {
+  return new Promise((onSaved, reject) => {
+    openDatabase()
+    .then(function(db) {            
+      let tx = createReadWriteTransaction(db);
+      tx.oncomplete = function() {
+        onSaved();
+      }
+      tx.onerror = function(reason) {
+        reject(reason);
+      }
+
+      let store: IDBObjectStore = tx.objectStore(storeName);
+      questions.forEach(question => store.put(question));
     })
     .catch(function(reason) {
       reject(reason);
