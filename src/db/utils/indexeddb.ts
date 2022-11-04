@@ -1,4 +1,4 @@
-import { QuestionImportStatus } from "~core/enums/question-import-status";
+import { QuestionImportMethod } from "~core/enums/question-import-method";
 import { QuestionState } from "~core/enums/question-state";
 import type { QuestionType } from "~core/enums/question-type";
 import type { IAnswer } from "~core/interfaces/answer";
@@ -56,15 +56,22 @@ function createReadWriteTransaction(db: IDBDatabase): IDBTransaction {
   return createTransaction(db, "readwrite");
 }
 
-export async function predictQuestionImportStatus(questionToImport: Question, questionKey: string, questions?: Document[]): Promise<QuestionImportStatus> {
-  return new Promise((resolve) => {
+/**
+ * @param questions add question, if method is Added, AddedOrOverwritten or Merged 
+ */
+export async function chooseQuestionImportMethod(questionToImport: Question, questionKey: string, questions?: Document[]): Promise<QuestionImportMethod> {
+  return new Promise((resolve, reject) => {
+    if (!questionToImport?.answer?.state) {
+      reject(new Error('No state', {cause: questionToImport}));
+    }
+
     switch (questionToImport.answer.state) {
       case QuestionState.correct:
         questions?.push({key: questionKey, question: questionToImport});
-        resolve(QuestionImportStatus.Overwritten);
+        resolve(QuestionImportMethod.AddOrOverwrite);
         break;
       case QuestionState.partiallycorrect:
-        retrieveQuestion(questionKey).then(function(questionInDb) {
+        retrieveQuestion(questionKey).then(function(questionInDb) {          
           if (questionInDb) {
             if (questionInDb.type !== questionToImport.type) {
               throw new Error(`Can't import question with key "${questionKey}": \
@@ -73,11 +80,11 @@ export async function predictQuestionImportStatus(questionToImport: Question, qu
     
             switch (questionInDb.answer.state) {
               case QuestionState.correct:
-                resolve(QuestionImportStatus.Ignored);
+                resolve(QuestionImportMethod.Ignore);
                 break;
               case QuestionState.incorrect:
                 questions?.push({key: questionKey, question: questionToImport});
-                resolve(QuestionImportStatus.Added);
+                resolve(QuestionImportMethod.Add);
                 break;
               case QuestionState.partiallycorrect:
                 let type: QuestionType = questionToImport.type;
@@ -92,7 +99,7 @@ export async function predictQuestionImportStatus(questionToImport: Question, qu
                 let mergedAnswer: IAnswer = merger.merge(questionInDb.answer, questionToImport.answer);
 
                 questions?.push({key: questionKey, question: new Question(text, type, mergedAnswer)});
-                resolve(QuestionImportStatus.Merged);
+                resolve(QuestionImportMethod.Merge);
                 break;
               default:
                 throw new Error(`Can't import question with key "${questionKey}": \
@@ -100,41 +107,42 @@ export async function predictQuestionImportStatus(questionToImport: Question, qu
             }
           } else {
             questions?.push({key: questionKey, question: questionToImport});
-            resolve(QuestionImportStatus.Added);
+            resolve(QuestionImportMethod.Add);
           }
         });
         break;
       default:
-        resolve(QuestionImportStatus.Ignored);
+        questions?.push({key: questionKey, question: questionToImport});
+        resolve(QuestionImportMethod.Add);
     }
   });
 }
 
 export async function importQuestions(newQuestions: Map<string, Question>): Promise<QuestionsImportStatus> {
-  let importStatuses: Promise<QuestionImportStatus>[] = [];
+  let importMethods: Promise<QuestionImportMethod>[] = [];
   let questionsToSave: Document[] = [];
-  let status: QuestionsImportStatus = {added: 0, merged: 0, failed: 0, ignored: 0, overwritten: 0};
-
+  
   newQuestions.forEach(function(questionToImport: Question, questionKey: string) {
-    importStatuses.push(predictQuestionImportStatus(questionToImport, questionKey, questionsToSave));
+    importMethods.push(chooseQuestionImportMethod(questionToImport, questionKey, questionsToSave));
   });
   return new Promise((onImported) => {
-    Promise.allSettled(importStatuses).then((promiseResults) => {
+    Promise.allSettled(importMethods).then((promiseResults) => {
       saveQuestions(questionsToSave).then(() => {
+        let status: QuestionsImportStatus = {added: 0, merged: 0, failed: 0, ignored: 0, addedOrOverwritten: 0};
         promiseResults.forEach(function(promiseResult) {
           if (promiseResult.status === "fulfilled") {
             switch (promiseResult.value) {
-              case QuestionImportStatus.Added:
+              case QuestionImportMethod.Add:
                 status.added++;
                 break;
-              case QuestionImportStatus.Merged:
+              case QuestionImportMethod.Merge:
                 status.merged++;
                 break;
-              case QuestionImportStatus.Ignored:
+              case QuestionImportMethod.Ignore:
                 status.ignored++;
                 break;
-              case QuestionImportStatus.Overwritten:
-                status.overwritten++;
+              case QuestionImportMethod.AddOrOverwrite:
+                status.addedOrOverwritten++;
                 break;
             }
           } else {
