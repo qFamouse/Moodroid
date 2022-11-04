@@ -28,16 +28,16 @@ function openDatabase(): Promise<IDBDatabase> {
     }
 
     const openRequest: IDBOpenDBRequest = indexedDB.open(databaseName);
-    openRequest.onerror = function(reason) {
+    openRequest.onerror = (reason) => {
       reject(reason);
     };
-    openRequest.onupgradeneeded = function(event: any) {
+    openRequest.onupgradeneeded = (event: any) => {
       db = event.target.result;
       if (!db.objectStoreNames.contains(storeName)) {
         db.createObjectStore(storeName, {keyPath: "key"});
       }
     }
-    openRequest.onsuccess = function(event: any) {
+    openRequest.onsuccess = (event: any) => {
       db = db || event.target.result;
       onOpened(db);
     };
@@ -71,7 +71,7 @@ export async function chooseQuestionImportMethod(questionToImport: Question, que
         resolve(QuestionImportMethod.AddOrOverwrite);
         break;
       case QuestionState.partiallycorrect:
-        retrieveQuestion(questionKey).then(function(questionInDb) {          
+        retrieveQuestion(questionKey).then((questionInDb) => {          
           if (questionInDb) {
             if (questionInDb.type !== questionToImport.type) {
               throw new Error(`Can't import question with key "${questionKey}": \
@@ -122,14 +122,14 @@ export async function importQuestions(newQuestions: Map<string, Question>): Prom
   let importMethods: Promise<QuestionImportMethod>[] = [];
   let questionsToSave: Document[] = [];
   
-  newQuestions.forEach(function(questionToImport: Question, questionKey: string) {
+  newQuestions.forEach((questionToImport: Question, questionKey: string) => {
     importMethods.push(chooseQuestionImportMethod(questionToImport, questionKey, questionsToSave));
   });
   return new Promise((onImported) => {
     Promise.allSettled(importMethods).then((promiseResults) => {
       saveQuestions(questionsToSave).then(() => {
         let status: QuestionsImportStatus = {added: 0, merged: 0, failed: 0, ignored: 0, addedOrOverwritten: 0};
-        promiseResults.forEach(function(promiseResult) {
+        promiseResults.forEach((promiseResult) => {
           if (promiseResult.status === "fulfilled") {
             switch (promiseResult.value) {
               case QuestionImportMethod.Add:
@@ -148,8 +148,8 @@ export async function importQuestions(newQuestions: Map<string, Question>): Prom
           } else {
             status.failed++;
           }
-          onImported(status);
         });
+        onImported(status);
       });
     });
   });
@@ -158,19 +158,19 @@ export async function importQuestions(newQuestions: Map<string, Question>): Prom
 export async function saveQuestion(questionKey: string, question: Question): Promise<void> {
   return new Promise((onSaved, reject) => {
     openDatabase()
-    .then(function(db) {            
+    .then((db) => {            
       let tx = createReadWriteTransaction(db);
-      tx.oncomplete = function() {
+      tx.oncomplete = () => {
         onSaved();
       }
-      tx.onerror = function(reason) {
+      tx.onerror = (reason) => {
         reject(reason);
       }
 
       let store: IDBObjectStore = tx.objectStore(storeName);
       store.put({key: questionKey, question: question});
     })
-    .catch(function(reason) {
+    .catch((reason) => {
       reject(reason);
     });
   });
@@ -179,19 +179,19 @@ export async function saveQuestion(questionKey: string, question: Question): Pro
 export async function saveQuestions(questions: Document[]): Promise<void> {
   return new Promise((onSaved, reject) => {
     openDatabase()
-    .then(function(db) {            
+    .then((db) => {            
       let tx = createReadWriteTransaction(db);
-      tx.oncomplete = function() {
+      tx.oncomplete = () => {
         onSaved();
       }
-      tx.onerror = function(reason) {
+      tx.onerror = (reason) => {
         reject(reason);
       }
 
       let store: IDBObjectStore = tx.objectStore(storeName);
       questions.forEach(question => store.put(question));
     })
-    .catch(function(reason) {
+    .catch((reason) => {
       reject(reason);
     });
   });
@@ -200,23 +200,23 @@ export async function saveQuestions(questions: Document[]): Promise<void> {
 export async function retrieveQuestion(questionKey: string): Promise<Question> {
   return new Promise((onRetrieved, reject) => {
     openDatabase()
-    .then(function(db) {            
+    .then((db) => {            
       let question: Question;
       let tx = createReadonlyTransaction(db);
-      tx.oncomplete = function() {
+      tx.oncomplete = () => {
         onRetrieved(question);
       }
-      tx.onerror = function(reason) {
+      tx.onerror = (reason) => {
         reject(reason);
       }
 
       let store: IDBObjectStore = tx.objectStore(storeName);
       let request: IDBRequest = store.get(questionKey);
-      request.onsuccess = function(event: any) {
+      request.onsuccess = (event: any) => {
         question = event.target.result?.question;
       }      
     })
-    .catch(function(reason) {
+    .catch((reason) => {
       reject(reason);
     });
   });
@@ -225,24 +225,24 @@ export async function retrieveQuestion(questionKey: string): Promise<Question> {
 export async function retrieveAllQuestions(): Promise<Map<string, Question>> {
   return new Promise((onRetrieved, reject) => {
     openDatabase()
-    .then(function(db) {            
+    .then((db) => {            
       let questions: Map<string, Question> = new Map();
       let tx = createReadonlyTransaction(db);
-      tx.oncomplete = function() {
+      tx.oncomplete = () => {
         onRetrieved(questions);
       }
-      tx.onerror = function(reason) {
+      tx.onerror = (reason) => {
         reject(reason);
       }
 
       let store = tx.objectStore(storeName);
       let request: IDBRequest = store.getAll();
-      request.onsuccess = function(event: any) {
+      request.onsuccess = (event: any) => {
         let documents: Document[] = event.target.result;        
         documents.forEach(d => questions.set(d.key, d.question));
       }
     })
-    .catch(function(reason) {
+    .catch((reason) => {
       reject(reason);
     });
   });
@@ -251,23 +251,23 @@ export async function retrieveAllQuestions(): Promise<Map<string, Question>> {
 export async function retrieveQuestionsCount(): Promise<number> {
   return new Promise((onRetrieved, reject) => {
     openDatabase()
-    .then(function(db) {    
+    .then((db) => {    
       let count: number;        
       let tx = createReadonlyTransaction(db);
-      tx.oncomplete = function() {        
+      tx.oncomplete = () => {        
         onRetrieved(count);
       }
-      tx.onerror = function(reason) {
+      tx.onerror = (reason) => {
         reject(reason);
       }
 
       let store = tx.objectStore(storeName);
       let request: IDBRequest = store.count();
-      request.onsuccess = function(event: any) {       
+      request.onsuccess = (event: any) => {       
         count = event.target.result;
       }
     })
-    .catch(function(reason) {
+    .catch((reason) => {
       reject(reason);
     });
   });
@@ -276,19 +276,19 @@ export async function retrieveQuestionsCount(): Promise<number> {
 export async function removeAllQuestions(): Promise<void> {  
   return new Promise((onRemoved, reject) => {
     openDatabase()
-    .then(function(db) {    
+    .then((db) => {    
       let tx = createReadWriteTransaction(db);
-      tx.oncomplete = function() {        
+      tx.oncomplete = () => {        
         onRemoved();
       }
-      tx.onerror = function(reason) {
+      tx.onerror = (reason) => {
         reject(reason);
       }
 
       let store = tx.objectStore(storeName);
       store.clear();
     })
-    .catch(function(reason) {
+    .catch((reason) => {
       reject(reason);
     });
   });
