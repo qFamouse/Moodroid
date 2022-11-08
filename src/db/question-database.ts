@@ -42,7 +42,7 @@ export class QuestionDatabase {
 
   static async import(data: string): Promise<QuestionsImportStatus> {
     return new Promise((onReceived) => {
-      chrome.runtime.sendMessage(new ImportRequest(data), function(response: IResponse) {
+      chrome.runtime.sendMessage(new ImportRequest(data), (response: IResponse) => {
         QuestionDatabase.handleResponseWithData(response, onReceived, new Error("Failed to import questions."));
       });
     });
@@ -50,14 +50,14 @@ export class QuestionDatabase {
 
   static export(): Promise<string> {
     return new Promise((onExported) => {
-      chrome.runtime.sendMessage(new ExportRequest(), function(response: IResponse) {
+      chrome.runtime.sendMessage(new ExportRequest(), (response: IResponse) => {
         QuestionDatabase.handleResponseWithData(response, onExported, new Error("Failed to export questions."));
       });
     });
   }
 
   static add(key: string, question: Question) {
-    chrome.runtime.sendMessage(new AddRequest(key, question), function(response: IResponse) {
+    chrome.runtime.sendMessage(new AddRequest(key, question), (response: IResponse) => {
       if (response.status !== ResponseStatus.Success) {
         throw new Error("Failed to add question to database.");
       }
@@ -66,7 +66,7 @@ export class QuestionDatabase {
 
   static async get(key: string): Promise<Question> {
     return new Promise((onReceived) => {
-      chrome.runtime.sendMessage(new GetRequest(key), function(response: IResponse) {
+      chrome.runtime.sendMessage(new GetRequest(key), (response: IResponse) => {
         QuestionDatabase.handleResponseWithData(response, onReceived, new Error("Failed to get question."));
       });
     });
@@ -74,14 +74,14 @@ export class QuestionDatabase {
 
   static async size(): Promise<number> {
     return new Promise((onReceived) => {
-      chrome.runtime.sendMessage(new SizeRequest(), function(response: IResponse) {
+      chrome.runtime.sendMessage(new SizeRequest(), (response: IResponse) => {
         QuestionDatabase.handleResponseWithData(response, onReceived, new Error("Failed to get database size."));
       });
     });
   }
 
   static clear() {
-    chrome.runtime.sendMessage(new ClearRequest(), function(response: IResponse) {
+    chrome.runtime.sendMessage(new ClearRequest(), (response: IResponse) => {
       if (response.status !== ResponseStatus.Success) {
         throw new Error("Failed to clear database.");
       }

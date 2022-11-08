@@ -12,13 +12,13 @@ import { importQuestions, removeAllQuestions, retrieveAllQuestions, retrieveQues
 /**
  * Handle request: {command: Command.Import, data: "..."}
  */
-export const handleImport = function(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {  
+export function handleImport(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {  
   if (request.command === Command.Import) {  
     try {
       console.log("Import requested.");
 
       let newQuestions: Map<string, Question> = JSON.parse((request as ImportRequest).data, reviver);
-      importQuestions(newQuestions).then(function(importStatus) {
+      importQuestions(newQuestions).then((importStatus) => {
         sendResponse(new SuccessResponseWithData(importStatus));
         console.log(`Imported ${newQuestions.size - importStatus.failed}`, importStatus);
       });
@@ -33,7 +33,7 @@ export const handleImport = function(request: any, sender: chrome.runtime.Messag
 /**
  * Handle request: {command: Command.Export}
  */
-export const handleExport = function(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
+export function handleExport(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
   if (request.command === Command.Export) {
     retrieveAllQuestions().then((questions) => {
       let text = JSON.stringify(questions, replacer);
@@ -47,9 +47,9 @@ export const handleExport = function(request: any, sender: chrome.runtime.Messag
 /**
  * Handle request: {command: Command.Add, key: "...", question: "..."}
  */
-export const handleAdd = function(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
+export function handleAdd(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
   if (request.command === Command.Add) {
-    saveQuestion((request as AddRequest).key, (request as AddRequest).question).then(function() {
+    saveQuestion((request as AddRequest).key, (request as AddRequest).question).then(() => {
       sendResponse(new SuccessResponse());
       console.log("Question added.", request.question);
     });
@@ -60,9 +60,9 @@ export const handleAdd = function(request: any, sender: chrome.runtime.MessageSe
 /**
  * Handle request: {command: Command.Get, key: "..."}
  */
-export const handleGet = function(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
+export function handleGet(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
   if (request.command === Command.Get) {
-    retrieveQuestion((request as GetRequest).key).then(function(question) {
+    retrieveQuestion((request as GetRequest).key).then((question) => {
       sendResponse(new SuccessResponseWithData(question));
       console.log("Question sent.", question);
     });
@@ -73,9 +73,9 @@ export const handleGet = function(request: any, sender: chrome.runtime.MessageSe
 /**
  * Handle request: {command: Command.Size}
  */
-export const handleSize = function(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
+export function handleSize(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
   if (request.command === Command.Size) {
-    retrieveQuestionsCount().then(function(count) {
+    retrieveQuestionsCount().then((count) => {
       sendResponse(new SuccessResponseWithData(count));
     });
     return true;
@@ -85,9 +85,9 @@ export const handleSize = function(request: any, sender: chrome.runtime.MessageS
 /**
  * Handle request: {command: Command.Clear}
  */
-export const handleClear = function(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
+export function handleClear(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
   if (request.command === Command.Clear) {
-    removeAllQuestions().then(function() {
+    removeAllQuestions().then(() => {
       sendResponse(new SuccessResponse());
     });
     return true;
