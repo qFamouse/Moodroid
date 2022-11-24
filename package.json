@@ -1,7 +1,7 @@
 {
   "name": "sdo-auto-reply",
   "displayName": "Sdo Auto Reply",
-  "version": "1.0",
+  "version": "1.0.0",
   "description": "Browser extension for cheating online tests",
   "author": "Famouse",
   "packageManager": "npm@8.3.1",
