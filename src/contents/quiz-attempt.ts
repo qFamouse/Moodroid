@@ -5,15 +5,18 @@ import type {IAnswerer} from "~core/interfaces/answerer";
 import {AnswerersFactory} from "~core/utils/answerers-factory";
 import modsCfg from "~../assets/configs/mods.conf.json"
 import {ExtensionMode} from "~core/enums/extension-mode";
+import {AccessValidator} from "~core/utils/access-validator";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/attempt.php*"]
 }
 
 window.addEventListener("load", async () => {
+    await AccessValidator.validate();
+
     // TODO: for production set window.localStorage to chrome.storage.local
     // TODO: adding provider for extension mode
-    let currentExtensionMode : ExtensionMode = window.localStorage[modsCfg.localStorageKey] || ExtensionMode.adventure //modsCfg.defaultMode
+    let currentExtensionMode : ExtensionMode = window.localStorage[modsCfg.localStorageKey] || ExtensionMode.exam //modsCfg.defaultMode
 
     if (!(currentExtensionMode in ExtensionMode)) {
         console.log("Disabled mode", currentExtensionMode)
