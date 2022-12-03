@@ -1,4 +1,4 @@
-import { QuestionImportStatus } from "~core/enums/question-import-status"
+import { QuestionImportMethod } from "~core/enums/question-import-method"
 import { QuestionState } from "~core/enums/question-state"
 import type { QuestionType } from "~core/enums/question-type"
 import type { IAnswer } from "~core/interfaces/answer"
@@ -29,26 +29,23 @@ function openDatabase(): Promise<IDBDatabase> {
         }
 
         const openRequest: IDBOpenDBRequest = indexedDB.open(databaseName)
-        openRequest.onerror = function (reason) {
+        openRequest.onerror = (reason) => {
             reject(reason)
         }
-        openRequest.onupgradeneeded = function (event: any) {
+        openRequest.onupgradeneeded = (event: any) => {
             db = event.target.result
             if (!db.objectStoreNames.contains(storeName)) {
                 db.createObjectStore(storeName, { keyPath: "key" })
             }
         }
-        openRequest.onsuccess = function (event: any) {
+        openRequest.onsuccess = (event: any) => {
             db = db || event.target.result
             onOpened(db)
         }
     })
 }
 
-function createTransaction(
-    db: IDBDatabase,
-    mode: IDBTransactionMode
-): IDBTransaction {
+function createTransaction(db: IDBDatabase, mode: IDBTransactionMode): IDBTransaction {
     return db.transaction(storeName, mode)
 }
 
@@ -60,143 +57,162 @@ function createReadWriteTransaction(db: IDBDatabase): IDBTransaction {
     return createTransaction(db, "readwrite")
 }
 
-export async function importQuestion(
+/**
+ * @param questions add question, if method is Added, AddedOrOverwritten or Merged
+ */
+export async function chooseQuestionImportMethod(
     questionToImport: Question,
-    questionKey: string
-): Promise<QuestionImportStatus> {
-    return new Promise((onImported) => {
+    questionKey: string,
+    questions?: Document[]
+): Promise<QuestionImportMethod> {
+    return new Promise((resolve) => {
+        console.debug("chooseQuestionImportMethod()", questionToImport, questionKey)
+
+        if (!questionToImport?.answer?.state) {
+            let message: string = `No state in question with key "${questionKey}"`
+            console.debug(message)
+            throw new Error(message)
+        }
+
         switch (questionToImport.answer.state) {
             case QuestionState.correct:
-                saveQuestion(questionKey, questionToImport).then(function () {
-                    onImported(QuestionImportStatus.Overwritten)
-                })
-                break
+                questions?.push({ key: questionKey, question: questionToImport })
+                resolve(QuestionImportMethod.AddOrOverwrite)
+                return
             case QuestionState.partiallycorrect:
-                retrieveQuestion(questionKey).then(function (questionInDb) {
+                retrieveQuestion(questionKey).then((questionInDb) => {
                     if (questionInDb) {
                         if (questionInDb.type !== questionToImport.type) {
-                            throw new Error(`Can't import question with key "${questionKey}": \
-                types (${questionInDb.type}, ${questionToImport.type}) are not equal`)
+                            let message: string = `Can't import question with key "${questionKey}": \
+                types (${questionInDb.type}, ${questionToImport.type}) are not equal`
+                            console.debug(message)
+                            throw new Error(message)
                         }
 
                         switch (questionInDb.answer.state) {
                             case QuestionState.correct:
-                                onImported(QuestionImportStatus.Ignored)
-                                break
+                                resolve(QuestionImportMethod.Ignore)
+                                return
                             case QuestionState.incorrect:
-                                saveQuestion(
-                                    questionKey,
-                                    questionToImport
-                                ).then(function () {
-                                    onImported(QuestionImportStatus.Added)
-                                })
-                                break
+                                questions?.push({ key: questionKey, question: questionToImport })
+                                resolve(QuestionImportMethod.Add)
+                                return
                             case QuestionState.partiallycorrect:
                                 let type: QuestionType = questionToImport.type
                                 let text: string = questionToImport.text
-                                let merger: IAnswerMerger =
-                                    AnswerMergerFactory.getAnswerMerger(type)
+                                let merger: IAnswerMerger = AnswerMergerFactory.getAnswerMerger(type)
 
                                 if (!merger) {
-                                    throw new Error(`Can't import question with key "${questionKey}": \
-                    no answer merger found (${questionInDb.answer.state}, ${questionToImport.answer.state})`)
+                                    let message: string = `Can't import question with key "${questionKey}": \
+                    no answer merger found (${questionInDb.answer.state}, ${questionToImport.answer.state})`
+                                    console.debug(message)
+                                    throw new Error(message)
                                 }
 
-                                let mergedAnswer: IAnswer = merger.merge(
-                                    questionInDb.answer,
-                                    questionToImport.answer
-                                )
+                                let mergedAnswer: IAnswer = merger.merge(questionInDb.answer, questionToImport.answer)
 
-                                saveQuestion(
-                                    questionKey,
-                                    new Question(text, type, mergedAnswer)
-                                ).then(function () {
-                                    onImported(QuestionImportStatus.Merged)
-                                })
-                                break
+                                questions?.push({ key: questionKey, question: new Question(text, type, mergedAnswer) })
+                                resolve(QuestionImportMethod.Merge)
+                                return
                             default:
-                                throw new Error(`Can't import question with key "${questionKey}": \
-                  question states (${questionInDb.answer.state}, ${questionToImport.answer.state})`)
+                                questions?.push({ key: questionKey, question: questionToImport })
+                                resolve(QuestionImportMethod.AddOrOverwrite)
+                                return
                         }
                     } else {
-                        saveQuestion(questionKey, questionToImport).then(
-                            function () {
-                                onImported(QuestionImportStatus.Added)
-                            }
-                        )
+                        questions?.push({ key: questionKey, question: questionToImport })
+                        resolve(QuestionImportMethod.Add)
+                        return
                     }
                 })
                 break
             default:
-                onImported(QuestionImportStatus.Ignored)
+                questions?.push({ key: questionKey, question: questionToImport })
+                resolve(QuestionImportMethod.AddOrOverwrite)
+                return
         }
     })
 }
 
-export async function importQuestions(
-    newQuestions: Map<string, Question>
-): Promise<QuestionsImportStatus> {
-    let importStatuses: Promise<QuestionImportStatus>[] = []
-    let status: QuestionsImportStatus = {
-        added: 0,
-        merged: 0,
-        failed: 0,
-        ignored: 0,
-        overwritten: 0
-    }
+export async function importQuestions(newQuestions: Map<string, Question>): Promise<QuestionsImportStatus> {
+    let importMethods: Promise<QuestionImportMethod>[] = []
+    let questionsToSave: Document[] = []
 
-    newQuestions.forEach(function (
-        questionToImport: Question,
-        questionKey: string
-    ) {
-        importStatuses.push(importQuestion(questionToImport, questionKey))
+    newQuestions.forEach((questionToImport: Question, questionKey: string) => {
+        importMethods.push(chooseQuestionImportMethod(questionToImport, questionKey, questionsToSave))
     })
     return new Promise((onImported) => {
-        Promise.allSettled(importStatuses).then((promiseResults) => {
-            promiseResults.forEach(function (promiseResult) {
-                if (promiseResult.status === "fulfilled") {
-                    switch (promiseResult.value) {
-                        case QuestionImportStatus.Added:
-                            status.added++
-                            break
-                        case QuestionImportStatus.Merged:
-                            status.merged++
-                            break
-                        case QuestionImportStatus.Ignored:
-                            status.ignored++
-                            break
-                        case QuestionImportStatus.Overwritten:
-                            status.overwritten++
-                            break
+        Promise.allSettled(importMethods).then((promiseResults) => {
+            console.debug("Question Import Methods", promiseResults)
+
+            saveQuestions(questionsToSave).then(() => {
+                let status: QuestionsImportStatus = { added: 0, merged: 0, failed: 0, ignored: 0, addedOrOverwritten: 0 }
+                promiseResults.forEach((promiseResult) => {
+                    if (promiseResult.status === "fulfilled") {
+                        switch (promiseResult.value) {
+                            case QuestionImportMethod.Add:
+                                status.added++
+                                break
+                            case QuestionImportMethod.Merge:
+                                status.merged++
+                                break
+                            case QuestionImportMethod.Ignore:
+                                status.ignored++
+                                break
+                            case QuestionImportMethod.AddOrOverwrite:
+                                status.addedOrOverwritten++
+                                break
+                        }
+                    } else {
+                        status.failed++
                     }
-                } else {
-                    status.failed++
-                }
+                })
+                onImported(status)
             })
-            onImported(status)
         })
     })
 }
 
-export async function saveQuestion(
-    questionKey: string,
-    question: Question
-): Promise<void> {
+export async function saveQuestion(questionKey: string, question: Question): Promise<void> {
     return new Promise((onSaved, reject) => {
         openDatabase()
-            .then(function (db) {
+            .then((db) => {
                 let tx = createReadWriteTransaction(db)
-                tx.oncomplete = function () {
+                tx.oncomplete = () => {
                     onSaved()
                 }
-                tx.onerror = function (reason) {
+                tx.onerror = (reason) => {
                     reject(reason)
                 }
 
                 let store: IDBObjectStore = tx.objectStore(storeName)
                 store.put({ key: questionKey, question: question })
             })
-            .catch(function (reason) {
+            .catch((reason) => {
+                reject(reason)
+            })
+    })
+}
+
+export async function saveQuestions(questions: Document[]): Promise<void> {
+    return new Promise((onSaved, reject) => {
+        openDatabase()
+            .then((db) => {
+                let tx = createReadWriteTransaction(db)
+                tx.oncomplete = () => {
+                    onSaved()
+                }
+                tx.onerror = (reason) => {
+                    reject(reason)
+                }
+
+                let store: IDBObjectStore = tx.objectStore(storeName)
+                questions.forEach((question) => {
+                    console.debug("Question saved", question)
+                    store.put(question)
+                })
+            })
+            .catch((reason) => {
                 reject(reason)
             })
     })
@@ -205,23 +221,23 @@ export async function saveQuestion(
 export async function retrieveQuestion(questionKey: string): Promise<Question> {
     return new Promise((onRetrieved, reject) => {
         openDatabase()
-            .then(function (db) {
+            .then((db) => {
                 let question: Question
                 let tx = createReadonlyTransaction(db)
-                tx.oncomplete = function () {
+                tx.oncomplete = () => {
                     onRetrieved(question)
                 }
-                tx.onerror = function (reason) {
+                tx.onerror = (reason) => {
                     reject(reason)
                 }
 
                 let store: IDBObjectStore = tx.objectStore(storeName)
                 let request: IDBRequest = store.get(questionKey)
-                request.onsuccess = function (event: any) {
-                    question = event.target.result.question
+                request.onsuccess = (event: any) => {
+                    question = event.target.result?.question
                 }
             })
-            .catch(function (reason) {
+            .catch((reason) => {
                 reject(reason)
             })
     })
@@ -230,24 +246,24 @@ export async function retrieveQuestion(questionKey: string): Promise<Question> {
 export async function retrieveAllQuestions(): Promise<Map<string, Question>> {
     return new Promise((onRetrieved, reject) => {
         openDatabase()
-            .then(function (db) {
+            .then((db) => {
                 let questions: Map<string, Question> = new Map()
                 let tx = createReadonlyTransaction(db)
-                tx.oncomplete = function () {
+                tx.oncomplete = () => {
                     onRetrieved(questions)
                 }
-                tx.onerror = function (reason) {
+                tx.onerror = (reason) => {
                     reject(reason)
                 }
 
                 let store = tx.objectStore(storeName)
                 let request: IDBRequest = store.getAll()
-                request.onsuccess = function (event: any) {
+                request.onsuccess = (event: any) => {
                     let documents: Document[] = event.target.result
                     documents.forEach((d) => questions.set(d.key, d.question))
                 }
             })
-            .catch(function (reason) {
+            .catch((reason) => {
                 reject(reason)
             })
     })
@@ -256,23 +272,23 @@ export async function retrieveAllQuestions(): Promise<Map<string, Question>> {
 export async function retrieveQuestionsCount(): Promise<number> {
     return new Promise((onRetrieved, reject) => {
         openDatabase()
-            .then(function (db) {
+            .then((db) => {
                 let count: number
                 let tx = createReadonlyTransaction(db)
-                tx.oncomplete = function () {
+                tx.oncomplete = () => {
                     onRetrieved(count)
                 }
-                tx.onerror = function (reason) {
+                tx.onerror = (reason) => {
                     reject(reason)
                 }
 
                 let store = tx.objectStore(storeName)
                 let request: IDBRequest = store.count()
-                request.onsuccess = function (event: any) {
+                request.onsuccess = (event: any) => {
                     count = event.target.result
                 }
             })
-            .catch(function (reason) {
+            .catch((reason) => {
                 reject(reason)
             })
     })
@@ -281,19 +297,19 @@ export async function retrieveQuestionsCount(): Promise<number> {
 export async function removeAllQuestions(): Promise<void> {
     return new Promise((onRemoved, reject) => {
         openDatabase()
-            .then(function (db) {
+            .then((db) => {
                 let tx = createReadWriteTransaction(db)
-                tx.oncomplete = function () {
+                tx.oncomplete = () => {
                     onRemoved()
                 }
-                tx.onerror = function (reason) {
+                tx.onerror = (reason) => {
                     reject(reason)
                 }
 
                 let store = tx.objectStore(storeName)
                 store.clear()
             })
-            .catch(function (reason) {
+            .catch((reason) => {
                 reject(reason)
             })
     })

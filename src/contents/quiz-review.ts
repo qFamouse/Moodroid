@@ -2,6 +2,7 @@ import type { PlasmoContentScript } from "plasmo"
 
 import type { Question } from "~core/models/question"
 import { QuestionParser } from "~core/parsers/question-parser"
+import { AccessValidator } from "~core/utils/access-validator"
 import { generateQuestionKey } from "~core/utils/generate-question-key"
 import { QuestionDatabase } from "~db/question-database"
 
@@ -10,6 +11,8 @@ export const config: PlasmoContentScript = {
 }
 
 window.addEventListener("load", async () => {
+    await AccessValidator.validate()
+
     let ques = document.querySelectorAll(".que") as NodeListOf<HTMLElement>
     ques.forEach((que, i) => {
         try {

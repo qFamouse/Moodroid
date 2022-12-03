@@ -1,6 +1,9 @@
 import type { PlasmoContentScript } from "plasmo"
 
+import modsCfg from "~../assets/configs/mods.conf.json"
+import { ExtensionMode } from "~core/enums/extension-mode"
 import type { IAnswerer } from "~core/interfaces/answerer"
+import { AccessValidator } from "~core/utils/access-validator"
 import { AnswerersFactory } from "~core/utils/answerers-factory"
 import { generateQuestionKey } from "~core/utils/generate-question-key"
 import { QuestionDatabase } from "~db/question-database"
@@ -10,6 +13,17 @@ export const config: PlasmoContentScript = {
 }
 
 window.addEventListener("load", async () => {
+    await AccessValidator.validate()
+
+    // TODO: for production set window.localStorage to chrome.storage.local
+    // TODO: adding provider for extension mode
+    let currentExtensionMode: ExtensionMode = window.localStorage[modsCfg.localStorageKey] || ExtensionMode.exam //modsCfg.defaultMode
+
+    if (!(currentExtensionMode in ExtensionMode)) {
+        console.log("Disabled mode", currentExtensionMode)
+        return
+    }
+
     let ques = document.querySelectorAll(".que") as NodeListOf<HTMLElement>
 
     ques.forEach((que, i) => {
@@ -21,9 +35,7 @@ window.addEventListener("load", async () => {
                 return
             }
 
-            let answerer: IAnswerer = AnswerersFactory.getAnswerer(
-                question.type
-            )
+            let answerer: IAnswerer = AnswerersFactory.getAnswerer(question.type)
 
             if (!answerer) {
                 console.log("Answerer not found", question.type)
@@ -31,7 +43,19 @@ window.addEventListener("load", async () => {
             }
 
             try {
-                answerer.answer(que, question)
+                switch (currentExtensionMode) {
+                    case ExtensionMode.exam:
+                        answerer.exam(que, question)
+                        break
+                    case ExtensionMode.hack:
+                        answerer.hack(que, question)
+                        break
+                    case ExtensionMode.adventure:
+                        answerer.adventure(que, question)
+                        break
+                    default:
+                        console.warn("Unsupported extension mode", i)
+                }
             } catch (e) {
                 console.warn(e, i)
             }
