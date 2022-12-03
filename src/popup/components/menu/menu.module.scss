@@ -7,6 +7,12 @@ $menu-margin: 8px;
 :global(body) {
     background: none;
     margin: $menu-margin;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .menu {
@@ -34,7 +40,7 @@ $menu-margin: 8px;
 
 .button {
     @include font($main-font, 600, 16px);
-    padding: 6px 12px;
+    padding: 4px 10px;
     background-color: $main-color;
     color: white;
     border-radius: 20px;
@@ -82,9 +88,9 @@ $menu-margin: 8px;
     flex-direction: column;
     gap: 10px;
 
-    &__hint {
+    &__header {
         color: $hints-color;
-        @include font($main-font, 400, 10px);
+        @include font($main-font, 600, 10px);
     }
 
     &__records {
@@ -108,9 +114,9 @@ $menu-margin: 8px;
     flex-direction: column;
     gap: 10px;
 
-    &__hint {
+    &__header {
         color: $hints-color;
-        @include font($main-font, 400, 10px);
+        @include font($main-font, 600, 10px);
     }
 
     &__toggle {

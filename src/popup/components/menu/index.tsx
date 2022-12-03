@@ -2,18 +2,13 @@ import { useCallback, useState } from "react"
 
 import { QuestionDatabase } from "~db/question-database"
 
-import { download } from "../../utils/download"
+import { download } from "~popup/utils/download"
+import { classNames } from "~popup/utils/class-names"
 import SelectButton, { ISelectOption } from "../select-button"
 import StatusBar from "../status-bar"
 import ToggleButton from "../toggle-button"
 import styles from "./menu.module.scss"
-
-function classNames(classes) {
-    return Object.entries(classes)
-        .filter(([key, value]) => value)
-        .map(([key, value]) => key)
-        .join(" ")
-}
+import Tooltip from "../tooltip"
 
 export function Menu() {
     const [dbSize, setDbSize] = useState(0)
@@ -84,7 +79,7 @@ export function Menu() {
     return (
         <div className={styles.menu}>
             <div className={[styles.menu__database, styles.database].join(" ")}>
-                <div className={styles.database__hint}>Database</div>
+                <div className={styles.database__header}>Database</div>
 
                 <div className={styles.database__records}>
                     {dbSize} <br></br> <span>Records</span>
@@ -123,28 +118,34 @@ export function Menu() {
             </div>
 
             <div className={[styles.menu__options, styles.options].join(" ")}>
-                <div className={styles.options__hint}>Options</div>
+                <div className={styles.options__header}>Options</div>
                 <div
                     className={classNames({
                         [styles.options__toggle]: true,
                         [styles.options__toggle_inactive]: !isStoreQuestions
                     })}>
-                    <ToggleButton
-                        text="Store questions:"
-                        checked={isStoreQuestions}
-                        onChange={setStoreQuestionsHandler}
-                    />
+
+                    <Tooltip text="Enables/disables saving questions to database" delay={1000}>
+                        <ToggleButton
+                            text="Store questions:"
+                            checked={isStoreQuestions}
+                            onChange={setStoreQuestionsHandler}
+                        />
+                    </Tooltip>
                 </div>
                 <div
                     className={classNames({
                         [styles.options__toggle]: true,
                         [styles.options__toggle_inactive]: !isManualSaving
                     })}>
-                    <ToggleButton
-                        text="Manual saving:"
-                        checked={isManualSaving}
-                        onChange={setManualSavingHandler}
-                    />
+
+                    <Tooltip text="Enables/disables manual save questions to database" delay={1000}>
+                        <ToggleButton
+                            text="Manual saving:"
+                            checked={isManualSaving}
+                            onChange={setManualSavingHandler}
+                        />
+                    </Tooltip>
                 </div>
                 <div className={styles.options__select}>
                     <SelectButton options={selectOptions} />
