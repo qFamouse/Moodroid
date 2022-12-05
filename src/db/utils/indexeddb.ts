@@ -5,7 +5,7 @@ import type { IAnswer } from "~core/interfaces/answer";
 import type { IAnswerMerger } from "~core/interfaces/answer-merger";
 import { Question } from "~core/models/question";
 import type { QuestionsImportStatus } from "~core/types/questions-import-status";
-import { AnswerMergerFactory } from "./import/answer-merger-factory";
+import { AnswerMergerFactory } from "./mergers/answer-merger-factory";
 
 declare type Document = {
   key: string,
