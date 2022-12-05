@@ -1,11 +1,11 @@
 import type { QuestionType } from "~core/enums/question-type";
 import type { IAnswer } from "~core/interfaces/answer";
 import type { IAnswerMerger } from "~core/interfaces/answer-merger";
-import type { QuestionMerger } from "~core/interfaces/question-merger";
+import type { IQuestionMerger } from "~core/interfaces/question-merger";
 import { Question } from "~core/models/question";
 import { AnswerMergerFactory } from "./answer-merger-factory";
 
-export class DbQuestionMerger implements QuestionMerger {
+export class DbQuestionMerger implements IQuestionMerger {
 
   constructor() {}
 

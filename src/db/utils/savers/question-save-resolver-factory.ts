@@ -6,9 +6,9 @@ import { MultianswerQuestionSaveResolver } from "./multianswer-question-save-res
 import { MultichoiseQuestionSaveResolver } from "./multichoise-question-save-resolver";
 import { ShortanswerQuestionSaveResolver } from "./shortanswer-question-save-resolver";
 
-export class QuestionSaverFactory {
+export class QuestionSaveResolverFactory {
 
-    private static typeSaver: Map<QuestionType, () => IQuestionSaveResolver> = new Map([
+    private static typeSaver = new Map<QuestionType, () => IQuestionSaveResolver>([
         [QuestionType.multichoice, () => new MultichoiseQuestionSaveResolver()],
         [QuestionType.match, () => new MatchQuestionSaveResolver()],
         [QuestionType.shortanswer, () => new ShortanswerQuestionSaveResolver()],
@@ -17,7 +17,7 @@ export class QuestionSaverFactory {
     ]);
 
     static getQuestionSaver(questionType: QuestionType): IQuestionSaveResolver | undefined {
-        let constructor: () => IQuestionSaveResolver = QuestionSaverFactory.typeSaver.get(questionType);
+        let constructor: () => IQuestionSaveResolver = QuestionSaveResolverFactory.typeSaver.get(questionType);
 
         if (!constructor) return;
 

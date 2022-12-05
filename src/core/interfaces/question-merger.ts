@@ -1,5 +1,5 @@
 import type { Question } from "~core/models/question";
 
-export interface QuestionMerger {
+export interface IQuestionMerger {
   merge(question1: Question, question2: Question): Question;
 }

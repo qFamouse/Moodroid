@@ -7,52 +7,52 @@ import { retrieveQuestion } from "../indexeddb";
 
 export class ShortanswerQuestionSaveResolver implements IQuestionSaveResolver {
 
-  save(questionToSave: Question, questionKey: string): Promise<QuestionSaveResolveStatus> {
-    return new Promise((resolve) => {
-      console.debug("ShortanswerQuestionSaveResolver", "save()", questionToSave, questionKey);
+  resolve(questionToSave: Question, questionKey: string): Promise<QuestionSaveResolveStatus> {
+    return new Promise((onResolved, reject) => {
+      console.debug("ShortanswerQuestionSaveResolver", "resolve()", questionToSave, questionKey);
 
       retrieveQuestion(questionKey).then((questionInDb) => {
         if (!questionInDb) {
-          resolve({question: questionToSave, type: QuestionSaveResolveType.Write});
+          onResolved({question: questionToSave, type: QuestionSaveResolveType.Write});
           return;
         }
 
         switch (questionInDb.answer.state) {
           case QuestionState.correct:
-            resolve({question: questionInDb, type: QuestionSaveResolveType.Ignore});
+            onResolved({question: questionInDb, type: QuestionSaveResolveType.Ignore});
             break;
           case QuestionState.incorrect:
-            this.onStateIncorrect(questionInDb, questionToSave, resolve);
+            this.onStateIncorrect(questionInDb, questionToSave, onResolved);
             break;
           case QuestionState.partiallycorrect:
-            this.onStatePartiallyCorrect(questionInDb, questionToSave, resolve);
+            this.onStatePartiallyCorrect(questionInDb, questionToSave, onResolved);
             break;
+          default:
+            onResolved({question: questionToSave, type: QuestionSaveResolveType.Write});
         }
-      });
+      })
+      .catch((reason) => reject(reason));
     });
   }
 
-  private onStateIncorrect(questionInDb: Question, questionToSave: Question, resolve: (status: QuestionSaveResolveStatus) => void) {
+  private onStateIncorrect(questionInDb: Question, questionToSave: Question, onResolved: (status: QuestionSaveResolveStatus) => void) {
     switch (questionToSave.answer.state) {
-      case QuestionState.correct:
-      case QuestionState.partiallycorrect:
-        resolve({question: questionToSave, type: QuestionSaveResolveType.Write});
-        break;
       case QuestionState.incorrect:
-        resolve({question: questionInDb, type: QuestionSaveResolveType.Ignore});
+        onResolved({question: questionInDb, type: QuestionSaveResolveType.Ignore});
         break;
+      default:
+        onResolved({question: questionToSave, type: QuestionSaveResolveType.Write});
     }
   }
 
-  private onStatePartiallyCorrect(questionInDb: Question, questionToSave: Question, resolve: (status: QuestionSaveResolveStatus) => void) {
+  private onStatePartiallyCorrect(questionInDb: Question, questionToSave: Question, onResolved: (status: QuestionSaveResolveStatus) => void) {
     switch (questionToSave.answer.state) {
-      case QuestionState.correct:
-        resolve({question: questionToSave, type: QuestionSaveResolveType.Write});
-        break;
       case QuestionState.partiallycorrect:
       case QuestionState.incorrect:
-        resolve({question: questionInDb, type: QuestionSaveResolveType.Ignore});
+        onResolved({question: questionInDb, type: QuestionSaveResolveType.Ignore});
         break;
+      default:
+        onResolved({question: questionToSave, type: QuestionSaveResolveType.Write});
     }
   }
 }

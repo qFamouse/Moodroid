@@ -1,7 +1,6 @@
 export declare type QuestionsImportStatus = {
-    added: number,
+    written: number,
     merged: number,
-    failed: number,
     ignored: number,
-    addedOrOverwritten: number,
+    failed: number,
 }

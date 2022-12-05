@@ -1,13 +1,10 @@
-import { QuestionImportMethod } from "~core/enums/question-import-method";
-import { QuestionState } from "~core/enums/question-state";
-import type { QuestionType } from "~core/enums/question-type";
-import type { IAnswer } from "~core/interfaces/answer";
-import type { IAnswerMerger } from "~core/interfaces/answer-merger";
-import { Question } from "~core/models/question";
+import { QuestionSaveResolveType } from "~core/enums/question-save-resolve-type";
+import type { IQuestionSaveResolver } from "~core/interfaces/question-save-resolver";
+import type { Question } from "~core/models/question";
 import type { QuestionsImportStatus } from "~core/types/questions-import-status";
-import { AnswerMergerFactory } from "./mergers/answer-merger-factory";
+import { QuestionSaveResolverFactory } from "./savers/question-save-resolver-factory";
 
-declare type Document = {
+declare type Entity = {
   key: string,
   question: Question
 };
@@ -56,153 +53,92 @@ function createReadWriteTransaction(db: IDBDatabase): IDBTransaction {
   return createTransaction(db, "readwrite");
 }
 
-/**
- * @param questions add question, if method is Added, AddedOrOverwritten or Merged 
- */
-export async function chooseQuestionImportMethod(questionToImport: Question, questionKey: string, questions?: Document[]): Promise<QuestionImportMethod> {
-  return new Promise((resolve) => {
-    console.debug("chooseQuestionImportMethod()", questionToImport, questionKey);
-
-    if (!questionToImport?.answer?.state) {
-      let message: string = `No state in question with key "${questionKey}"`;
-      console.debug(message);
-      throw new Error(message);
-    }
-
-    switch (questionToImport.answer.state) {
-      case QuestionState.correct:
-        questions?.push({key: questionKey, question: questionToImport});
-        resolve(QuestionImportMethod.AddOrOverwrite);
-        return;
-      case QuestionState.partiallycorrect:
-        retrieveQuestion(questionKey).then((questionInDb) => {
-          if (questionInDb) {
-            if (questionInDb.type !== questionToImport.type) {
-              let message: string = `Can't import question with key "${questionKey}": \
-                types (${questionInDb.type}, ${questionToImport.type}) are not equal`;
-              console.debug(message);
-              throw new Error(message);
-            }
-    
-            switch (questionInDb.answer.state) {
-              case QuestionState.correct:
-                resolve(QuestionImportMethod.Ignore);
-                return;
-              case QuestionState.incorrect:
-                questions?.push({key: questionKey, question: questionToImport});
-                resolve(QuestionImportMethod.Add);
-                return;                
-              case QuestionState.partiallycorrect:
-                let type: QuestionType = questionToImport.type;
-                let text: string = questionToImport.text;
-                let merger: IAnswerMerger = AnswerMergerFactory.getAnswerMerger(type);
-
-                if (!merger) {
-                  let message: string = `Can't import question with key "${questionKey}": \
-                    no answer merger found (${questionInDb.answer.state}, ${questionToImport.answer.state})`;
-                  console.debug(message);
-                  throw new Error(message);
-                }
-                
-                let mergedAnswer: IAnswer = merger.merge(questionInDb.answer, questionToImport.answer);
-
-                questions?.push({key: questionKey, question: new Question(text, type, mergedAnswer)});
-                resolve(QuestionImportMethod.Merge);
-                return;
-              default:
-                questions?.push({key: questionKey, question: questionToImport});
-                resolve(QuestionImportMethod.AddOrOverwrite);
-                return;
-            }
-          } else {
-            questions?.push({key: questionKey, question: questionToImport});
-            resolve(QuestionImportMethod.Add);
-            return;
-          }
-        });
-        break;
-      default:
-        questions?.push({key: questionKey, question: questionToImport});
-        resolve(QuestionImportMethod.AddOrOverwrite);
-        return;
-    }
-  });
-}
-
-export async function importQuestions(newQuestions: Map<string, Question>): Promise<QuestionsImportStatus> {
-  let importMethods: Promise<QuestionImportMethod>[] = [];
-  let questionsToSave: Document[] = [];
-  
-  newQuestions.forEach((questionToImport: Question, questionKey: string) => {
-    importMethods.push(chooseQuestionImportMethod(questionToImport, questionKey, questionsToSave));
-  });
+export async function importQuestions(newQuestions: Map<string, Question>): Promise<QuestionsImportStatus> {  
   return new Promise((onImported) => {
-    Promise.allSettled(importMethods).then((promiseResults) => {
-      console.debug("Question Import Methods", promiseResults);
-      
-      saveQuestions(questionsToSave).then(() => {
-        let status: QuestionsImportStatus = {added: 0, merged: 0, failed: 0, ignored: 0, addedOrOverwritten: 0};
-        promiseResults.forEach((promiseResult) => {
-          if (promiseResult.status === "fulfilled") {
-            switch (promiseResult.value) {
-              case QuestionImportMethod.Add:
-                status.added++;
-                break;
-              case QuestionImportMethod.Merge:
-                status.merged++;
-                break;
-              case QuestionImportMethod.Ignore:
-                status.ignored++;
-                break;
-              case QuestionImportMethod.AddOrOverwrite:
-                status.addedOrOverwritten++;
-                break;
-            }
-          } else {
-            status.failed++;
-          }
+    let entities: Entity[] = [];
+    let enitityPromises: Promise<void>[] = [];
+    let importStatus: QuestionsImportStatus = {written: 0, merged: 0, ignored: 0, failed: 0};
+
+    newQuestions.forEach((questionToImport, questionKey) => {
+      enitityPromises.push(new Promise((onFinished, reject) => {
+        let resolver: IQuestionSaveResolver = QuestionSaveResolverFactory.getQuestionSaver(questionToImport.type);      
+        resolver.resolve(questionToImport, questionKey)
+        .then((status) => {
+          let questionToSave: Question = status.question;
+
+          switch (status.type) {
+            case QuestionSaveResolveType.Ignore:
+              importStatus.ignored++;
+              break;
+            case QuestionSaveResolveType.Merge:
+              importStatus.merged++;
+              entities.push({key: questionKey, question: questionToSave});
+              break;
+            case QuestionSaveResolveType.Write:
+              importStatus.written++;
+              entities.push({key: questionKey, question: questionToSave});
+              break;
+          }          
+          onFinished();
+        })
+        .catch(() => {
+          importStatus.failed++;
+          reject();
         });
-        onImported(status);
-      });
+      }))
+    });
+
+    Promise.allSettled(enitityPromises).then(() => {
+      saveQuestions(entities).then(() => onImported(importStatus));
     });
   });
 }
 
 export async function saveQuestion(questionKey: string, question: Question): Promise<void> {
-  return new Promise((onSaved, reject) => {
-    openDatabase()
-    .then((db) => {            
-      let tx = createReadWriteTransaction(db);
-      tx.oncomplete = () => {
-        onSaved();
-      }
-      tx.onerror = (reason) => {
-        reject(reason);
-      }
+  let resolver: IQuestionSaveResolver = QuestionSaveResolverFactory.getQuestionSaver(question.type);      
+  return resolver.resolve(question, questionKey)
+  .then((status) => {
+    question = status.question;
 
-      let store: IDBObjectStore = tx.objectStore(storeName);
-      store.put({key: questionKey, question: question});
-    })
-    .catch((reason) => {
-      reject(reason);
-    });
+    switch (status.type) {
+      case QuestionSaveResolveType.Merge:
+      case QuestionSaveResolveType.Write:
+        openDatabase()
+        .then((db) => {            
+          let tx = createReadWriteTransaction(db);
+          tx.oncomplete = () => Promise.resolve();
+          tx.onerror = (reason) => Promise.reject(reason);
+          
+          let store: IDBObjectStore = tx.objectStore(storeName);
+          store.put({key: questionKey, question: question});
+        });
+        break;
+    }
+  },
+  (reason) => {
+    let message: string = `Failed to resolve question "${questionKey}"`;
+    console.log(message);
+    console.debug(message, reason);
   });
 };
 
-export async function saveQuestions(questions: Document[]): Promise<void> {
-  return new Promise((onSaved, reject) => {
+export async function saveQuestions(entities: Entity[]): Promise<void> {
+  return new Promise((onAllSaved, reject) => {
     openDatabase()
-    .then((db) => {            
+    .then((db) => {   
       let tx = createReadWriteTransaction(db);
       tx.oncomplete = () => {
-        onSaved();
+        onAllSaved();
       }
       tx.onerror = (reason) => {
         reject(reason);
       }
 
       let store: IDBObjectStore = tx.objectStore(storeName);
-      questions.forEach(question => { console.debug("Question saved", question); store.put(question); });
+      entities.forEach(entity => { 
+        console.debug("Question to save", entity);
+        store.put(entity);
+      });
     })
     .catch((reason) => {
       reject(reason);
@@ -251,7 +187,7 @@ export async function retrieveAllQuestions(): Promise<Map<string, Question>> {
       let store = tx.objectStore(storeName);
       let request: IDBRequest = store.getAll();
       request.onsuccess = (event: any) => {
-        let documents: Document[] = event.target.result;        
+        let documents: Entity[] = event.target.result;        
         documents.forEach(d => questions.set(d.key, d.question));
       }
     })
