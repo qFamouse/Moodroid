@@ -15,6 +15,12 @@ export class MultichoiceParser implements IAnswerParser {
             throw new Error("Can't parse complete question in partiallycorrect state");
         }
 
+        if (state == QuestionState.correct) {
+            // TODO: [DISCUSS] Fix Sdo bug - all checkbox is checked => max grade. (We do not parse that!)
+            // Discuss it. Because if QuestionGroup.correct Incorrect, we can separate correct and incorrect.
+            // And if Question Group.complete we can't know all or not all answers if correct
+        }
+
         return {
             correctAnswers: MultichoiceParser.parseAnswers(que, group, state, true),
             incorrectAnswers: MultichoiceParser.parseAnswers(que, group, state,false),
@@ -50,10 +56,6 @@ export class MultichoiceParser implements IAnswerParser {
 
             default:
                 throw new Error("Unsupported group");
-        }
-
-        if (state == QuestionState.correct) {
-            // TODO: Fix Sdo bug - all checkbox is checked => max grade. (We do not parse that!)
         }
 
         return Array.from(answerLabels).map((answerLabel) => answerLabel.textContent);
