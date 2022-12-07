@@ -3,9 +3,9 @@ import {QuestionDatabase} from "~db/question-database";
 import {generateQuestionKey} from "~core/utils/generate-question-key";
 import type {IAnswerer} from "~core/interfaces/answerer";
 import {AnswerersFactory} from "~core/utils/answerers-factory";
-import modsCfg from "~../assets/configs/mods.conf.json"
 import {ExtensionMode} from "~core/enums/extension-mode";
 import {AccessValidator} from "~core/utils/access-validator";
+import {ExtensionApi} from "~core/utils/extension-api";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/attempt.php*"]
@@ -16,11 +16,11 @@ window.addEventListener("load", async () => {
 
     // TODO: for production set window.localStorage to chrome.storage.local
     // TODO: adding provider for extension mode
-    let currentExtensionMode : ExtensionMode = window.localStorage[modsCfg.localStorageKey] || ExtensionMode.exam //modsCfg.defaultMode
+    let currentExtensionMode : ExtensionMode = await ExtensionApi.getCurrentMode();
 
     if (!(currentExtensionMode in ExtensionMode)) {
         console.log("Disabled mode", currentExtensionMode)
-        return
+        return;
     }
 
     let ques = document.querySelectorAll('.que') as NodeListOf<HTMLElement>;
