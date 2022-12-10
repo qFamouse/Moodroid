@@ -1,11 +1,11 @@
 /**
- * @type {import('prettier').Options}
+ * @type {import("prettier").Options}
  */
 module.exports = {
-  printWidth: 80,
-  tabWidth: 2,
+  printWidth: 140,
+  tabWidth: 4,
   useTabs: false,
-  semi: false,
+  semi: true,
   singleQuote: false,
   trailingComma: "none",
   bracketSpacing: true,
@@ -14,4 +14,4 @@ module.exports = {
   importOrder: ["^@plasmohq/(.*)$", "^~(.*)$", "^[./]"],
   importOrderSeparation: true,
   importOrderSortSpecifiers: true
-}
+};
