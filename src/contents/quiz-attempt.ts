@@ -15,8 +15,6 @@ export const config: PlasmoContentScript = {
 window.addEventListener("load", async () => {
     await AccessValidator.validate();
 
-    // TODO: for production set window.localStorage to chrome.storage.local
-    // TODO: adding provider for extension mode
     let currentExtensionMode: ExtensionMode = await ExtensionApi.getCurrentMode();
 
     if (currentExtensionMode !== ExtensionMode.disabled) {
