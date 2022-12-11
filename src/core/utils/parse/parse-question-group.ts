@@ -1,6 +1,6 @@
-import {QuestionGroup} from "~core/enums/question-group";
+import { QuestionGroup } from "~core/enums/question-group"
 
-export function parseQuestionGroup(que: HTMLElement) : QuestionGroup {
+export function parseQuestionGroup(que: HTMLElement): QuestionGroup {
     for (let token of que.classList) {
         switch (token) {
             case "correct":
@@ -13,5 +13,5 @@ export function parseQuestionGroup(que: HTMLElement) : QuestionGroup {
         }
     }
 
-    throw new Error("I can't identify the group");
+    throw new Error("I can't identify the group")
 }

@@ -11,7 +11,7 @@ export const config: PlasmoContentScript = {
 };
 
 window.addEventListener("load", async () => {
-    await AccessValidator.validate();
+    await AccessValidator.validate()
 
     let ques = document.querySelectorAll(".que") as NodeListOf<HTMLElement>;
     ques.forEach((que, i) => {
@@ -19,8 +19,8 @@ window.addEventListener("load", async () => {
             let question: Question = QuestionParser.parse(que);
 
             if (!question) {
-                console.log("Can't parse");
-                return;
+                console.log("Can't parse")
+                return
             }
 
             console.log("Parsed question", question);

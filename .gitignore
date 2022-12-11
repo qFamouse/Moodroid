@@ -43,3 +43,6 @@ keys.json
 
 # IntelliJ IDEA Settings
 .idea/
+
+# VSCode
+.vscode

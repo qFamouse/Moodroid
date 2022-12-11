@@ -1,9 +1,8 @@
 import { Command } from "~core/enums/command"
-import type { IRequest } from "~core/interfaces/request";
+import type { IRequest } from "~core/interfaces/request"
 
 export class ImportRequest implements IRequest {
-    readonly command: Command = Command.Import;
+    readonly command: Command = Command.Import
 
-    constructor(readonly data: string) {
-    }
+    constructor(readonly data: string) {}
 }
