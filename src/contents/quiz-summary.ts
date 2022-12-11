@@ -9,9 +9,14 @@ import { AccessValidator } from "~core/utils/access-validator";
 import { AnswerParserFactory } from "~core/utils/answer-parser-factory";
 import { ExtensionApi } from "~core/utils/extension-api";
 import { generateQuestionKey } from "~core/utils/generate-question-key";
+import { parseQuestionState } from "~core/utils/parse/parse-question-state";
 import { parseQuestionText } from "~core/utils/parse/parse-question-text";
 import { parseQuestionType } from "~core/utils/parse/parse-question-type";
 import { QuestionDatabase } from "~db/question-database";
+
+
+
+
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/summary.php*"]
@@ -55,14 +60,19 @@ function appendMdlAlignButton(parent: HTMLElement, title: string): HTMLButtonEle
 }
 
 async function explicitParsing(): Promise<number> {
-    let summaries: NodeListOf<HTMLTableRowElement> = document.querySelectorAll(".quizsummaryofattempt .answersaved");
+    let summaries: NodeListOf<HTMLTableRowElement> = document.querySelectorAll(".quizsummaryofattempt  [class^=quizsummary]");
     let successCount: number = 0;
+    let i = 0;
 
-    for (const summary of summaries) {
-        let anchor: HTMLAnchorElement = summary.querySelector("a");
-        let td = summary.querySelector("td:last-child");
+    while (i < summaries.length) {
+        if (!summaries[i].classList.contains(QuestionState.answersaved)) {
+            i++; continue;
+        }
+
+        let anchor: HTMLAnchorElement = summaries[i].querySelector("a");
 
         let response = await fetch(anchor.href, { method: "GET" });
+        console.error("RESPONSE")
 
         if (response.ok) {
             let text = await response.text();
@@ -70,25 +80,35 @@ async function explicitParsing(): Promise<number> {
             let parser = new DOMParser();
             let answerDocument = parser.parseFromString(text, "text/html");
 
-            let que = answerDocument.querySelector(".que") as HTMLElement;
+            let ques = answerDocument.querySelectorAll(".que") as NodeListOf<HTMLElement>;
+            let currentQueIndex = i % ques.length;
 
-            if (que) {
-                try {
-                    let type: QuestionType = parseQuestionType(que);
-                    let text: string = parseQuestionText(que);
-                    let answer: IAnswer = AnswerParserFactory.getAnswerParser(type)?.forceParse(que, QuestionState.partiallycorrect);
+            for (let k = currentQueIndex; k < ques.length; k++, i++) {
+                if (parseQuestionState(ques[k]) !== QuestionState.notyetanswered) {
+                    let td = summaries[i].querySelector("td:last-child");
+
+                    let type: QuestionType;
+                    let text: string;
+                    let answer: IAnswer;
+
+                    try {
+                        type = parseQuestionType(ques[k]);
+                        text = parseQuestionText(ques[k]);
+                        answer = AnswerParserFactory.getAnswerParser(type)?.forceParse(ques[k], QuestionState.partiallycorrect);
+                    }
+                    catch (e) {
+                        console.warn(e, summaries[i]);
+                    }
 
                     if (type && text && answer) {
                         let question = new Question(text, type, answer);
                         console.log("Parsed question", question);
 
-                        let key = generateQuestionKey(que);
+                        let key = generateQuestionKey(ques[k]);
                         QuestionDatabase.add(key, question);
                         td.textContent += " ✅";
                         successCount++;
                     }
-                } catch (e) {
-                    console.warn(e, summary);
                 }
             }
         }
