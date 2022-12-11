@@ -17,7 +17,7 @@ window.addEventListener("load", async () => {
 
     let currentExtensionMode: ExtensionMode = await ExtensionApi.getCurrentMode();
 
-    if (currentExtensionMode !== ExtensionMode.disabled) {
+    if (currentExtensionMode === ExtensionMode.disabled) {
         console.log("Disabled mode");
         return;
     }
