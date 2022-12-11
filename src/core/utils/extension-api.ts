@@ -2,9 +2,13 @@ import {ExtensionMode} from "~core/enums/extension-mode";
 
 const
     CURRENT_MODE_KEY = "current_mode",
+    DEFAULT_MODE : ExtensionMode = ExtensionMode.exam,
+
     COLLECT_ANSWERS_KEY = "collect_answers",
+    DEFAULT_COLLECT_ANSWERS : boolean = true,
+
     EXPLICIT_PARSING_KEY = "explicit_parsing",
-    DEFAULT_MODE : ExtensionMode = ExtensionMode.exam;
+    DEFAULT_EXPLICIT_PARSING : boolean = false;
 
 export class ExtensionApi {
     public static async getCurrentMode() : Promise<ExtensionMode> {
@@ -13,6 +17,7 @@ export class ExtensionApi {
 
         if (!(currentMode in ExtensionMode)) {
             await chrome.storage.local.set({[CURRENT_MODE_KEY]: DEFAULT_MODE});
+            return DEFAULT_MODE;
         }
 
         return currentMode;
@@ -27,7 +32,8 @@ export class ExtensionApi {
         let currentState : boolean = storage[COLLECT_ANSWERS_KEY];
 
         if (typeof currentState !== "boolean") {
-            await chrome.storage.local.set({[COLLECT_ANSWERS_KEY]: true});
+            await chrome.storage.local.set({[COLLECT_ANSWERS_KEY]: DEFAULT_COLLECT_ANSWERS});
+            return DEFAULT_COLLECT_ANSWERS;
         }
 
         return currentState;
@@ -42,7 +48,8 @@ export class ExtensionApi {
         let currentState : boolean = storage[EXPLICIT_PARSING_KEY];
 
         if (typeof currentState !== "boolean") {
-            await chrome.storage.local.set({[EXPLICIT_PARSING_KEY]: true});
+            await chrome.storage.local.set({[EXPLICIT_PARSING_KEY]: DEFAULT_EXPLICIT_PARSING});
+            return DEFAULT_EXPLICIT_PARSING;
         }
 
         return currentState;
