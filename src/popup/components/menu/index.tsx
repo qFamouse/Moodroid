@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { QuestionDatabase } from "~db/question-database"
 
@@ -9,35 +9,78 @@ import StatusBar from "../status-bar"
 import ToggleButton from "../toggle-button"
 import styles from "./menu.module.scss"
 import Tooltip from "../tooltip"
+import { ExtensionApi } from "~core/utils/extension-api"
+import { ExtensionMode } from "~core/enums/extension-mode"
+
+async function getStoreQuestionsInitialValue(): Promise<boolean> {
+    return ExtensionApi.getCollectAnswersState();
+}
+
+async function getManualSavingInitialValue(): Promise<boolean> {
+    return ExtensionApi.getExplicitParsingState();
+}
+
+async function getCurrentMode(): Promise<ExtensionMode> {
+    return ExtensionApi.getCurrentMode();
+}
+
+function getSelectedOptionByMode(mode: ExtensionMode | 'disabled') {
+    return selectOptions.find(({value}) => value === mode)
+}
+
+const selectOptions: ISelectOption[] = [
+        { name: "Adventure mode", value: ExtensionMode.adventure, ico: "adventure" },
+        { name: "Exam mode", value: ExtensionMode.exam, ico: "exam" },
+        { name: "Hack mode", value: ExtensionMode.hack, ico: "hack" },
+        { name: "Disabled", value: "disabled", ico: "disabled" }
+    ]
 
 export function Menu() {
     const [dbSize, setDbSize] = useState(0)
     const [status, setStatus] = useState("Hello :)")
 
-    const [isStoreQuestions, setStoreQuestions] = useState(true)
+    const [isStoreQuestions, setStoreQuestions] = useState(false)
     const [isManualSaving, setManualSaving] = useState(false)
+    const [selectedOption, setSelectedOption] = useState(selectOptions[3])
+
+    // useEffect to properly load async values
+    useEffect(() => {
+        getStoreQuestionsInitialValue().then(value => setStoreQuestions(value));
+        getManualSavingInitialValue().then(value => setManualSaving(value));
+        getCurrentMode().then(value => setSelectedOption(getSelectedOptionByMode(value)))
+        updateDatabaseSize().then(size => setDbSize(size));
+    }, [])
 
     const setStoreQuestionsHandler = useCallback(
         (event): void => {
             setStoreQuestions(event.target.checked)
+            ExtensionApi.setCollectAnswersState(event.target.checked);
         },
         [isStoreQuestions]
     )
-
+    
     const setManualSavingHandler = useCallback(
         (event): void => {
-            setManualSaving(event.target.checked)
+            setManualSaving(event.target.checked);
+            ExtensionApi.setExplicitParsingState(event.target.checked);
         },
         [isManualSaving]
     )
 
-    const selectOptions: ISelectOption[] = [
-        { name: "Adventure mode", value: "adventure", ico: "adventure" },
-        { name: "Stealth mode", value: "stealth", ico: "stealth" },
-        { name: "Hack mode", value: "hack", ico: "hack" },
-        { name: "Disable", value: "disable", ico: "disable" }
-    ]
+    const onSelectHandler = useCallback(
+        (option: ISelectOption): void => {
+            
+            setSelectedOption(getSelectedOptionByMode(option.value))
 
+            if(option.value === 'disabled') {
+                ExtensionApi.setCurrentMode(null);
+                return
+            }
+            ExtensionApi.setCurrentMode(option.value);
+        }, 
+        [selectedOption]
+    )
+    // TODO: implement by using useEffect
     const loadDatabaseHandler = (event): void => {
         let file = event.target.files[0] as File
         if (file) {
@@ -69,13 +112,10 @@ export function Menu() {
         updateDatabaseSize()
     }
 
-    const updateDatabaseSize = (): void => {
-        QuestionDatabase.size().then((size) => {
-            setDbSize(size)
-        })
+    const updateDatabaseSize = (): Promise<number> => {
+        return QuestionDatabase.size();
     }
 
-    updateDatabaseSize()
     return (
         <div className={styles.menu}>
             <div className={[styles.menu__database, styles.database].join(" ")}>
@@ -148,7 +188,7 @@ export function Menu() {
                     </Tooltip>
                 </div>
                 <div className={styles.options__select}>
-                    <SelectButton options={selectOptions} />
+                    <SelectButton options={selectOptions} onSelect={onSelectHandler} selectedOption={selectedOption} />
                 </div>
             </div>
 
