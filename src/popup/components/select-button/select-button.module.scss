@@ -1,0 +1,9 @@
+@import "../../styles/constants.scss";
+@import "../../styles/utils.scss";
+
+.select {
+    @include font($main-font, 600, 14px);
+    width: 100%;
+    padding: 4px 8px;
+    border-radius: 12px;
+}

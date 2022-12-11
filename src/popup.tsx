@@ -1,11 +1,10 @@
-import { Menu } from "~popup/components/menu";
+import { Menu } from "~popup/components/menu"
 
 function IndexPopup() {
-  return (
-    <div>
-       <Menu/>
-    </div>
-  )
-
+    return (
+        <div>
+            <Menu />
+        </div>
+    )
 }
-export default IndexPopup;
+export default IndexPopup
