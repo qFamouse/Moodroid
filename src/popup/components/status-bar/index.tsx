@@ -1,23 +1,27 @@
-import styles from "./status-bar.module.scss"
+import styles from './status-bar.module.css';
 
-interface IStatusBarRequiredProps {}
+interface IStatusBarRequiredProps {
+
+}
 
 interface IToggleButtonOptionalProps {
-    text?: string
+    text?: string;
 }
 
-const defaultProps: IToggleButtonOptionalProps = {}
+const defaultProps: IToggleButtonOptionalProps = {
 
-interface IStatusBarProps
-    extends IStatusBarRequiredProps,
-        IToggleButtonOptionalProps {}
+}
+
+interface IStatusBarProps extends IStatusBarRequiredProps, IToggleButtonOptionalProps {}
 
 const StatusBar = (props: IStatusBarProps) => {
-    const { text } = props
+    const { text } = props;
 
-    return <div className={styles.statusbar}>{text}</div>
+    return (
+        <div className={styles.statusbar}>{text}</div>
+    )
 }
 
-StatusBar.defaultProps = defaultProps
+StatusBar.defaultProps = defaultProps;
 
-export default StatusBar
+export default StatusBar;

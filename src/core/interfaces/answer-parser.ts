@@ -1,5 +1,5 @@
-import type { IAnswer } from "~core/interfaces/answer"
+import type {IAnswer} from "~core/interfaces/answer";
 
 export interface IAnswerParser {
-    parse(que: HTMLElement): IAnswer
+    parse(que : HTMLElement): IAnswer;
 }

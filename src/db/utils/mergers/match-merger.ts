@@ -1,63 +1,54 @@
-import type { IAnswerMerger } from "~core/interfaces/answer-merger"
-import type { MatchAnswer } from "~core/models/answers/match-answer"
+import type { IAnswerMerger } from "~core/interfaces/answer-merger";
+import type { MatchAnswer } from "~core/models/answers/match-answer";
 
 type MatchAnswerAnswer = {
-    correctAnswer?: string
-    incorrectAnswers: string[]
+  correctAnswer?: string,
+  incorrectAnswers : string[]
 }
 
 type MatchAnswerAnswers = {
-    [text: string]: MatchAnswerAnswer
+  [text: string]: MatchAnswerAnswer
 }
 
 export class MatchMerger implements IAnswerMerger {
-    merge(answerInDb: MatchAnswer, answerToImport: MatchAnswer): MatchAnswer {
-        let answers: MatchAnswerAnswers = {}
 
-        // copy answers from db
-        Object.keys(answerInDb.answers).forEach((text) => {
-            let answer: MatchAnswerAnswer = { incorrectAnswers: [] }
+  merge(answerInDb: MatchAnswer, answerToImport: MatchAnswer): MatchAnswer {
+    let answers: MatchAnswerAnswers = {};
 
-            if (answerInDb.answers[text].correctAnswer)
-                answer.correctAnswer = answerInDb.answers[text].correctAnswer
-            answer.incorrectAnswers = [
-                ...answerInDb.answers[text].incorrectAnswers
-            ]
+    // copy answers from db
+    Object.keys(answerInDb.answers).forEach((text) => {
+      let answer: MatchAnswerAnswer = {incorrectAnswers: []};
 
-            answers[text] = answer
-        })
+      if (answerInDb.answers[text].correctAnswer) answer.correctAnswer = answerInDb.answers[text].correctAnswer;
+      answer.incorrectAnswers = [...answerInDb.answers[text].incorrectAnswers];
 
-        // merge with answers to import
-        Object.keys(answerToImport.answers).forEach((text) => {
-            let answer: MatchAnswerAnswer = { incorrectAnswers: [] }
+      answers[text] = answer;
+    });
 
-            if (answerToImport.answers[text].correctAnswer)
-                answer.correctAnswer =
-                    answerToImport.answers[text].correctAnswer
-            answer.incorrectAnswers = [
-                ...answerToImport.answers[text].incorrectAnswers
-            ]
+    // merge with answers to import
+    Object.keys(answerToImport.answers).forEach((text) => {
+      let answer: MatchAnswerAnswer = {incorrectAnswers: []};
 
-            if (!answers[text]) {
-                answers[text] = answer
-            } else {
-                if (answer.correctAnswer)
-                    answers[text].correctAnswer = answer.correctAnswer
+      if (answerToImport.answers[text].correctAnswer) answer.correctAnswer = answerToImport.answers[text].correctAnswer;
+      answer.incorrectAnswers = [...answerToImport.answers[text].incorrectAnswers];
 
-                let incorrectAnswers: Set<string> = new Set(
-                    answer.incorrectAnswers
-                )
-                answers[text].incorrectAnswers.forEach((value) => {
-                    incorrectAnswers.add(value)
-                })
+      if (!answers[text]) {
+        answers[text] = answer;
+      } else {
+        if (answer.correctAnswer) answers[text].correctAnswer = answer.correctAnswer;
 
-                answer.incorrectAnswers = [...incorrectAnswers]
-            }
-        })
+        let incorrectAnswers: Set<string> = new Set(answer.incorrectAnswers);
+        answers[text].incorrectAnswers.forEach((value) => {
+          incorrectAnswers.add(value);
+        });    
+        
+        answer.incorrectAnswers = [...incorrectAnswers];
+      }
+    });
 
-        return {
-            answers: answers,
-            state: answerToImport.state
-        }
-    }
+    return {
+      answers: answers,
+      state: answerToImport.state
+    };
+  }
 }

@@ -1,6 +1,6 @@
-import { ResponseStatus } from "~core/enums/response-status"
-import type { IResponse } from "~core/interfaces/response"
+import type { IResponse } from "~core/interfaces/response";
+import { ResponseStatus } from "~core/enums/response-status";
 
 export class SuccessResponse implements IResponse {
-    readonly status: ResponseStatus = ResponseStatus.Success
+    readonly status: ResponseStatus = ResponseStatus.Success;
 }
