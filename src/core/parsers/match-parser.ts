@@ -6,6 +6,24 @@ import {parseQuestionState} from "~core/utils/parse/parse-question-state";
 import {MatchAnswer} from "~core/models/answers/match-answer";
 
 export class MatchParser implements IAnswerParser {
+    forceParse(que: HTMLElement, forceState: QuestionState): MatchAnswer {
+        let rows : NodeListOf<HTMLElement> = que.querySelectorAll("tbody>[class^=r]");
+
+        let matchAnswer : MatchAnswer = new MatchAnswer();
+        matchAnswer.state = forceState;
+
+        rows.forEach(row => {
+            let answerText : string = row.querySelector(".text").textContent;
+            let forceAnswer : string = row.querySelector("select>option:checked")?.textContent ?? undefined;
+
+            matchAnswer.answers[answerText] = {
+                correctAnswer: forceAnswer,
+                incorrectAnswers: []
+            }
+        })
+
+        return matchAnswer;
+    }
     parse(que: HTMLElement) : MatchAnswer {
         let group : QuestionGroup = parseQuestionGroup(que);
         let rows : NodeListOf<HTMLElement> = que.querySelectorAll("tbody>[class^=r]");

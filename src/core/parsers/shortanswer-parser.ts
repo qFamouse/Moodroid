@@ -18,4 +18,13 @@ export class ShortanswerParser implements IAnswerParser {
             state: state
         }
     }
+
+    forceParse(que: HTMLElement, forceState: QuestionState): ShortanswerAnswer {
+        let input : HTMLInputElement = que.querySelector(".answer>input");
+
+        return {
+            answer: input.value,
+            state: forceState
+        }
+    }
 }

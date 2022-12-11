@@ -18,4 +18,13 @@ export class EssayParser implements IAnswerParser {
             state: state
         }
     }
+
+    forceParse(que: HTMLElement, forceState: QuestionState): EssayAnswer {
+        let answer : HTMLElement = que.querySelector(".answer");
+
+        return {
+            answer: answer.textContent,
+            state: forceState
+        }
+    }
 }

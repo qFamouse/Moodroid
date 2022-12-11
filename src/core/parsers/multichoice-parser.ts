@@ -7,6 +7,18 @@ import {QuestionState} from "~core/enums/question-state";
 
 
 export class MultichoiceParser implements IAnswerParser {
+    forceParse(que: HTMLElement, forceState: QuestionState): MultichoiceAnswer {
+        let answerLabels : NodeListOf<HTMLElement> = que.querySelectorAll(`
+                    .answer>[class^=r]>input[type=radio]:checked + [data-region^=answer-label]>:last-child, 
+                    .answer>[class^=r]>input[type=checkbox]:checked  + [data-region^=answer-label]>:last-child`);
+
+        return {
+            correctAnswers: Array.from(answerLabels).map((answerLabel) => answerLabel.textContent),
+            incorrectAnswers: [],
+            state: forceState
+        }
+    }
+
     parse(que: HTMLElement): MultichoiceAnswer {
         let group : QuestionGroup = parseQuestionGroup(que);
         let state : QuestionState = parseQuestionState(que);
