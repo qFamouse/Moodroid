@@ -1,8 +1,8 @@
-import CryptoJS from 'crypto-js';
+import CryptoJS from "crypto-js";
 
 export class AccessValidator {
     public static async validate() {
-        let fromServer : object = await chrome.storage.session.get(["version", "state"]);
+        let fromServer: object = await chrome.storage.session.get(["version", "state"]);
         let currentVersion = chrome.runtime.getManifest().version;
 
         // for optimization, we immediately check match
@@ -33,30 +33,27 @@ export class AccessValidator {
 
     public static async syncServer() {
         console.log("[AccessValidator] syncServer");
-        let serverResponse = await fetch(
-            "https://my-json-server.typicode.com/GlobalAnswers/Extension-Authentication/extension",
-            {method: "GET"}
-        );
+        let serverResponse = await fetch("https://my-json-server.typicode.com/GlobalAnswers/Extension-Authentication/extension", {
+            method: "GET"
+        });
 
         if (serverResponse.ok) {
             let serverText = await serverResponse.text();
             let serverJson = JSON.parse(serverText);
 
             if (!serverJson.version || !serverJson.state) {
-                throw new Error("No data about necessary version or state")
+                throw new Error("No data about necessary version or state");
             }
 
             let version = CryptoJS.AES.decrypt(serverJson.version, "daenerys").toString(CryptoJS.enc.Utf8);
             let state = CryptoJS.AES.decrypt(serverJson.state, "daenerys").toString(CryptoJS.enc.Utf8);
 
-            await chrome.storage.session.set({version: version, state: state});
-        }
-        else {
-            let yandexResponse = await fetch("https://ya.ru/", {method: "GET"});
+            await chrome.storage.session.set({ version: version, state: state });
+        } else {
+            let yandexResponse = await fetch("https://ya.ru/", { method: "GET" });
             if (!yandexResponse.ok) {
-                await chrome.storage.session.set({version: "NO", state: "INTERNET"});
-            }
-            else {
+                await chrome.storage.session.set({ version: "NO", state: "INTERNET" });
+            } else {
                 throw new Error("The server is not responding");
             }
         }

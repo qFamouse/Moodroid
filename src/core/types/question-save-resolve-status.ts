@@ -2,6 +2,6 @@ import type { QuestionSaveResolveType } from "~core/enums/question-save-resolve-
 import type { Question } from "~core/models/question";
 
 export declare type QuestionSaveResolveStatus = {
-  question: Question,
-  type: QuestionSaveResolveType,
-}
+    question: Question;
+    type: QuestionSaveResolveType;
+};

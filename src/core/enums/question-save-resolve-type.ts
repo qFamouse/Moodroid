@@ -1,5 +1,5 @@
 export enum QuestionSaveResolveType {
-  Write  = "write",
-  Merge  = "merge",
-  Ignore = "ignore"
+    Write = "write",
+    Merge = "merge",
+    Ignore = "ignore"
 }

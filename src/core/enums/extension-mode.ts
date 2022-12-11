@@ -1,6 +1,6 @@
 export enum ExtensionMode {
-  exam = "exam",
-  adventure = "adventure",
-  hack = "hack",
-  disabled = "disabled"
+    exam = "exam",
+    adventure = "adventure",
+    hack = "hack",
+    disabled = "disabled"
 }

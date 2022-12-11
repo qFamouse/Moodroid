@@ -1,9 +1,9 @@
-import { QuestionGroup } from "~core/enums/question-group"
-import { QuestionState } from "~core/enums/question-state"
-import type { IAnswerParser } from "~core/interfaces/answer-parser"
-import { MultianswerAnswer } from "~core/models/answers/multianswer-answer"
-import { parseQuestionGroup } from "~core/utils/parse/parse-question-group"
-import { parseQuestionState } from "~core/utils/parse/parse-question-state"
+import { QuestionGroup } from "~core/enums/question-group";
+import { QuestionState } from "~core/enums/question-state";
+import type { IAnswerParser } from "~core/interfaces/answer-parser";
+import { MultianswerAnswer } from "~core/models/answers/multianswer-answer";
+import { parseQuestionGroup } from "~core/utils/parse/parse-question-group";
+import { parseQuestionState } from "~core/utils/parse/parse-question-state";
 
 export class MultianswerParser implements IAnswerParser {
     forceParse(que: HTMLElement, forceState: QuestionState): MultianswerAnswer {
@@ -17,50 +17,43 @@ export class MultianswerParser implements IAnswerParser {
             multianswerAnswer.answers.push(input.value);
         });
 
-        return multianswerAnswer
+        return multianswerAnswer;
     }
-    parse(que: HTMLElement): MultianswerAnswer {
-        let state: QuestionState = parseQuestionState(que)
-        let group: QuestionGroup = parseQuestionGroup(que)
 
-        if (
-            state != QuestionState.correct &&
-            state != QuestionState.partiallycorrect
-        ) {
-            throw new Error("Save only the correct/partiallycorrect answers")
+    parse(que: HTMLElement): MultianswerAnswer {
+        let state: QuestionState = parseQuestionState(que);
+        let group: QuestionGroup = parseQuestionGroup(que);
+
+        if (state != QuestionState.correct && state != QuestionState.partiallycorrect) {
+            throw new Error("Save only the correct/partiallycorrect answers");
         }
 
-        let answerContainer: HTMLElement = que.querySelector(
-            "input[type=hidden]+p+p"
-        )
-        let inputs: NodeListOf<HTMLInputElement> =
-            answerContainer.querySelectorAll("input")
-        let multianswerAnswer = new MultianswerAnswer()
-        multianswerAnswer.state = state
+        let answerContainer: HTMLElement = que.querySelector("input[type=hidden]+p+p");
+        let inputs: NodeListOf<HTMLInputElement> = answerContainer.querySelectorAll("input");
+        let multianswerAnswer = new MultianswerAnswer();
+        multianswerAnswer.state = state;
 
         switch (group) {
             case QuestionGroup.correctIncorrect:
                 inputs.forEach((input) => {
-                    let answerCheckIcon = input.nextSibling as HTMLElement
+                    let answerCheckIcon = input.nextSibling as HTMLElement;
                     if (answerCheckIcon.classList.contains("text-success")) {
-                        multianswerAnswer.answers.push(input.value)
+                        multianswerAnswer.answers.push(input.value);
                     } else {
-                        multianswerAnswer.answers.push("")
+                        multianswerAnswer.answers.push("");
                     }
-                })
-                return multianswerAnswer
+                });
+                return multianswerAnswer;
 
             case QuestionGroup.complete:
                 if (state == QuestionState.correct) {
                     inputs.forEach((input) => {
-                        multianswerAnswer.answers.push(input.value)
-                    })
+                        multianswerAnswer.answers.push(input.value);
+                    });
                 } else {
-                    throw new Error(
-                        "Can't save partiallycorrect answer in complete question"
-                    )
+                    throw new Error("Can't save partiallycorrect answer in complete question");
                 }
-                return multianswerAnswer
+                return multianswerAnswer;
         }
     }
 }

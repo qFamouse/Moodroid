@@ -1,6 +1,6 @@
 import { parseQuestionText } from "~core/utils/parse/parse-question-text";
 
-export function generateQuestionKey(que : HTMLElement): string {
+export function generateQuestionKey(que: HTMLElement): string {
     let key: string = parseQuestionText(que)
         .replace(/\s+/g, "") // remove spaces " "
         .toLowerCase();
