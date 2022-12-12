@@ -1,6 +1,5 @@
 import type { PlasmoContentScript } from "plasmo";
 
-import { ExtensionMode } from "~core/enums/extension-mode";
 import { QuestionState } from "~core/enums/question-state";
 import type { QuestionType } from "~core/enums/question-type";
 import type { IAnswer } from "~core/interfaces/answer";
@@ -24,9 +23,6 @@ export const config: PlasmoContentScript = {
 
 window.addEventListener("load", async () => {
     await AccessValidator.validate();
-
-    await ExtensionApi.setCurrentMode(ExtensionMode.exam);
-    await ExtensionApi.setExplicitParsingState(true);
 
     if (await ExtensionApi.getExplicitParsingState()) {
         let main: HTMLElement = document.querySelector("[role=main]");
@@ -72,7 +68,6 @@ async function explicitParsing(): Promise<number> {
         let anchor: HTMLAnchorElement = summaries[i].querySelector("a");
 
         let response = await fetch(anchor.href, { method: "GET" });
-        console.error("RESPONSE")
 
         if (response.ok) {
             let text = await response.text();
