@@ -70,6 +70,10 @@ $menu-margin: 8px;
         &_export {
             background-image: url(/assets/export.png);
         }
+
+        &_clear {
+            background-image: url(/assets/clear.png);
+        }
     }
 }
 
@@ -106,6 +110,10 @@ $menu-margin: 8px;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+
+        &_center {
+            justify-content: center;
+        }
     }
 }
 

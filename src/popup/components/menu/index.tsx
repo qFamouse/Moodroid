@@ -164,6 +164,23 @@ export function Menu() {
                             ].join(" ")}></div>
                     </label>
                 </div>
+
+                <div className={styles.database__buttons_center}>
+                    <label className={styles.button}>
+                        <input
+                            hidden
+                            type="button"
+                            onClick={clearDatabaseHandler}
+                        />
+                        Clear
+                        <div
+                            className={[
+                                styles.button__ico,
+                                styles.button__ico_clear
+                            ].join(" ")}></div>
+                    </label>
+                </div>
+
             </div>
 
             <div className={[styles.menu__options, styles.options].join(" ")}>
