@@ -88,8 +88,11 @@ export function Menu() {
             file.text().then((text) => {
                 if (text) {
                     try {
-                        QuestionDatabase.import(text)
-                        setStatus("Database is loaded")
+                        QuestionDatabase.import(text).then(() => {
+                            // TODO: Normal dynamic database size update
+                            // it's not feature, it's kostil' blyat'
+                            window.location.reload();
+                        });
                     } catch (e) {
                         setStatus(e.message)
                     }
@@ -98,7 +101,7 @@ export function Menu() {
         } else {
             setStatus("Failed database upload")
         }
-        updateDatabaseSize()
+        // updateDatabaseSize()
     }
 
     const downloadDatabaseHandler = (event): void => {
