@@ -13,10 +13,6 @@ import { parseQuestionText } from "~core/utils/parse/parse-question-text";
 import { parseQuestionType } from "~core/utils/parse/parse-question-type";
 import { QuestionDatabase } from "~db/question-database";
 
-
-
-
-
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/summary.php*"]
 };
@@ -62,7 +58,8 @@ async function explicitParsing(): Promise<number> {
 
     while (i < summaries.length) {
         if (!summaries[i].classList.contains(QuestionState.answersaved)) {
-            i++; continue;
+            i++;
+            continue;
         }
 
         let anchor: HTMLAnchorElement = summaries[i].querySelector("a");
@@ -90,8 +87,7 @@ async function explicitParsing(): Promise<number> {
                         type = parseQuestionType(ques[k]);
                         text = parseQuestionText(ques[k]);
                         answer = AnswerParserFactory.getAnswerParser(type)?.forceParse(ques[k], QuestionState.partiallycorrect);
-                    }
-                    catch (e) {
+                    } catch (e) {
                         console.warn(e, summaries[i]);
                     }
 
