@@ -82,26 +82,31 @@ export function Menu() {
     )
     // TODO: implement by using useEffect
     const loadDatabaseHandler = (event): void => {
-        let file = event.target.files[0] as File
-        if (file) {
-            setStatus("Loading Database...")
-            file.text().then((text) => {
-                if (text) {
-                    try {
-                        QuestionDatabase.import(text).then(() => {
-                            // TODO: Normal dynamic database size update
-                            // it's not feature, it's kostil' blyat'
-                            window.location.reload();
-                        });
-                    } catch (e) {
-                        setStatus(e.message)
+        let files = event.target.files as Array<File>;
+
+        if (files.length > 0) {
+            setStatus("Loading Database...");
+            for (let i = 0; i < files.length; i++) {
+                files[i].text().then(text => {
+                    if (text) {
+                        try {
+                            if (i === files.length - 1) {
+                                QuestionDatabase.import(text).then(() => {
+                                    // TODO: Normal dynamic database size update
+                                    // it's not feature, it's kostil' blyat'
+                                    window.location.reload();
+                                });
+                            }
+                            else {
+                                QuestionDatabase.import(text);
+                            }
+                        } catch (e) {
+                            setStatus(e.message)
+                        }
                     }
-                }
-            })
-        } else {
-            setStatus("Failed database upload")
+                });
+            }
         }
-        // updateDatabaseSize()
     }
 
     const downloadDatabaseHandler = (event): void => {
@@ -132,6 +137,7 @@ export function Menu() {
                     <label className={styles.button}>
                         <input
                             hidden
+                            multiple={true}
                             type="file"
                             accept=".json"
                             onInput={loadDatabaseHandler}
