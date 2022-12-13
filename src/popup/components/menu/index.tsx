@@ -167,7 +167,7 @@ export function Menu() {
 
                     <Tooltip text="Enables/disables saving questions to database" delay={1000}>
                         <ToggleButton
-                            text="Store questions:"
+                            text="Collect questions:"
                             checked={isStoreQuestions}
                             onChange={setStoreQuestionsHandler}
                         />
@@ -181,7 +181,7 @@ export function Menu() {
 
                     <Tooltip text="Enables/disables manual save questions to database" delay={1000}>
                         <ToggleButton
-                            text="Manual saving:"
+                            text="Explicit parsing:"
                             checked={isManualSaving}
                             onChange={setManualSavingHandler}
                         />
