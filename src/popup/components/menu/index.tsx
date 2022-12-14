@@ -111,9 +111,14 @@ export function Menu() {
 
     const downloadDatabaseHandler = (event): void => {
         QuestionDatabase.export().then((database) => {
-            download(database, "database.json", "application/json")
-        })
-    }
+            let date = new Date();
+            download(
+                database,
+                `database_${date.toISOString().slice(0, 10)}_${date.getHours()}h${date.getMinutes()}m.json`,
+                "application/json"
+            );
+        });
+    };
 
     const clearDatabaseHandler = (event): void => {
         QuestionDatabase.clear()
