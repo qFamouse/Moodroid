@@ -92,9 +92,8 @@ export function Menu() {
                         try {
                             if (i === files.length - 1) {
                                 QuestionDatabase.import(text).then(() => {
-                                    // TODO: Normal dynamic database size update
-                                    // it's not feature, it's kostil' blyat'
-                                    window.location.reload();
+                                    // TODO: temp solution
+                                    updateDatabaseSize().then(size => setDbSize(size));
                                 });
                             }
                             else {
@@ -121,8 +120,10 @@ export function Menu() {
     };
 
     const clearDatabaseHandler = (event): void => {
-        QuestionDatabase.clear()
-        updateDatabaseSize()
+        QuestionDatabase.clear().then(() => {
+            // TODO: temp solution
+            updateDatabaseSize().then(size => setDbSize(size));
+        });
     }
 
     const updateDatabaseSize = (): Promise<number> => {
