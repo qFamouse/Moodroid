@@ -1,16 +1,20 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react";
 
-import { QuestionDatabase } from "~db/question-database"
+import { ExtensionMode } from "~core/enums/extension-mode";
+import { ExtensionApi } from "~core/utils/extension-api";
+import { QuestionDatabase } from "~db/question-database";
+import { classNames } from "~popup/utils/class-names";
+import { download } from "~popup/utils/download";
 
-import { download } from "~popup/utils/download"
-import { classNames } from "~popup/utils/class-names"
-import SelectButton, { ISelectOption } from "../select-button"
-import StatusBar from "../status-bar"
-import ToggleButton from "../toggle-button"
-import styles from "./menu.module.scss"
-import Tooltip from "../tooltip"
-import { ExtensionApi } from "~core/utils/extension-api"
-import { ExtensionMode } from "~core/enums/extension-mode"
+import SelectButton, { ISelectOption } from "../select-button";
+import StatusBar from "../status-bar";
+import ToggleButton from "../toggle-button";
+import Tooltip from "../tooltip";
+import styles from "./menu.module.scss";
+
+
+
+
 
 async function getStoreQuestionsInitialValue(): Promise<boolean> {
     return ExtensionApi.getCollectAnswersState();
@@ -24,7 +28,7 @@ async function getCurrentMode(): Promise<ExtensionMode> {
     return ExtensionApi.getCurrentMode();
 }
 
-function getSelectedOptionByMode(mode: ExtensionMode | 'disabled') {
+function getSelectedOptionByMode(mode: ExtensionMode) {
     return selectOptions.find(({value}) => value === mode)
 }
 
@@ -32,7 +36,7 @@ const selectOptions: ISelectOption[] = [
         { name: "Adventure mode", value: ExtensionMode.adventure, ico: "adventure" },
         { name: "Exam mode", value: ExtensionMode.exam, ico: "exam" },
         { name: "Hack mode", value: ExtensionMode.hack, ico: "hack" },
-        { name: "Disabled", value: "disabled", ico: "disabled" }
+        { name: "Disabled", value:  ExtensionMode.disabled, ico: "disabled" }
     ]
 
 export function Menu() {
@@ -72,10 +76,6 @@ export function Menu() {
             
             setSelectedOption(getSelectedOptionByMode(option.value))
 
-            if(option.value === 'disabled') {
-                ExtensionApi.setCurrentMode(null);
-                return
-            }
             ExtensionApi.setCurrentMode(option.value);
         }, 
         [selectedOption]

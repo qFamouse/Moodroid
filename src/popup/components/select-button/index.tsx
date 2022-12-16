@@ -3,7 +3,7 @@ import styles from "./select-button.module.scss"
 
 export interface ISelectOption {
     name: string
-    value: ExtensionMode | 'disabled'
+    value: ExtensionMode
     ico?: any
 }
 
