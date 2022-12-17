@@ -93,7 +93,10 @@ export function Menu() {
                             if (i === files.length - 1) {
                                 QuestionDatabase.import(text).then(() => {
                                     // TODO: temp solution
-                                    updateDatabaseSize().then(size => setDbSize(size));
+                                    updateDatabaseSize().then(size => {
+                                        setDbSize(size);
+                                        setStatus("Loaded!");
+                                    });
                                 });
                             }
                             else {
