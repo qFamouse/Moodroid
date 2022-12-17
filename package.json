@@ -1,9 +1,19 @@
 {
-  "name": "sdo-auto-reply",
-  "displayName": "Sdo Auto Reply",
+  "name": "moodroid",
+  "displayName": "Moodroid",
   "version": "1.0.0",
-  "description": "Browser extension for cheating online tests",
+  "description": "Browser extension for working with texts in the moodle system",
   "author": "Famouse",
+  "contributors": [
+    {
+      "name": "tinmn9088",
+      "url": "https://github.com/tinmn9088"
+    },
+    {
+      "name": "Androm10",
+      "url": "https://github.com/Androm10"
+    }
+  ],
   "packageManager": "npm@8.3.1",
   "scripts": {
     "dev": "plasmo dev",
