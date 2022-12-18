@@ -58,28 +58,36 @@ export class MultichoiceAnswerer implements IAnswerer {
 
     public exam(que: HTMLElement, question: Question): void {
         // Adding html point for advises
-        let createStatusPoint = (): HTMLElement => {
-            let statusPoint: HTMLElement = document.createElement("div");
+        let createStatusPoint = (): HTMLDivElement => {
+            let statusPoint = document.createElement("div");
             statusPoint.innerHTML = "•";
             statusPoint.style.position = "absolute";
             statusPoint.style.fontSize = "20px";
             statusPoint.style.color = "#000000";
-            statusPoint.style.inset = "0 0 0 0";
             statusPoint.style.display = "none";
-
             return statusPoint;
         };
 
-        let correctPoint = createStatusPoint();
-        let incorrectPoint = createStatusPoint();
-
+        // Create points
         let bellIcon: HTMLElement = document.querySelector(".icon.fa.fa-bell.fa-fw");
-        bellIcon.style.position = "relative";
-        bellIcon.appendChild(correctPoint);
+        let correctPoint : HTMLDivElement = createStatusPoint();
 
         let messageIcon: HTMLElement = document.querySelector(".icon.fa.fa-comment.fa-fw");
-        messageIcon.style.position = "relative";
-        messageIcon.appendChild(incorrectPoint);
+        let incorrectPoint : HTMLDivElement = createStatusPoint();
+
+        if (bellIcon && messageIcon) {
+            correctPoint.style.inset = incorrectPoint.style.inset = "0 0 0 0";
+
+            bellIcon.style.position = messageIcon.style.position = "relative";
+            bellIcon.appendChild(correctPoint);
+            messageIcon.appendChild(incorrectPoint);
+        }
+        else {
+            correctPoint.style.bottom = incorrectPoint.style.bottom = "20px";
+            correctPoint.style.left = incorrectPoint.style.right = "20px";
+
+            document.body.append(correctPoint, incorrectPoint);
+        }
 
         // Generate events for tips
         let correctAction: IMultichoiceAction = (input: HTMLInputElement, answerLabel: HTMLElement) => {
