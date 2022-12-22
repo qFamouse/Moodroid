@@ -12,6 +12,10 @@ export class ShortanswerParser implements IAnswerParser {
         }
         let input: HTMLInputElement = que.querySelector("input[type=text]");
 
+        if (!input) {
+            throw new Error("Can't find input");
+        }
+
         return {
             answer: input.value,
             state: state

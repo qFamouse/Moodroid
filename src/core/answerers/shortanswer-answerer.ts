@@ -9,10 +9,13 @@ interface IShortanswerAction {
 
 export class ShortanswerAnswerer implements IAnswerer {
     private static handler(que: HTMLElement, question: Question, correctAction: IShortanswerAction): void {
-        let input: HTMLInputElement = que.querySelector(".answer>input");
-        if (input) {
-            correctAction(input);
+        let input: HTMLInputElement = que.querySelector("input[type=text]");
+
+        if (!input) {
+            throw new Error("Can't find input");
         }
+
+        correctAction(input);
     }
 
     adventure = this.hack;
