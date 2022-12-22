@@ -10,8 +10,7 @@ export class ShortanswerParser implements IAnswerParser {
         if (state != QuestionState.correct) {
             throw new Error("Save only the correct answers");
         }
-
-        let input: HTMLInputElement = que.querySelector(".answer>input");
+        let input: HTMLInputElement = que.querySelector("input[type=text]");
 
         return {
             answer: input.value,
