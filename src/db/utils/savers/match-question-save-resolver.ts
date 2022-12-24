@@ -18,37 +18,11 @@ export class MatchQuestionSaveResolver implements IQuestionSaveResolver {
                         onResolved({ question: questionToSave, type: QuestionSaveResolveType.Write });
                         return;
                     }
-
-                    switch (questionInDb.answer.state) {
-                        case QuestionState.correct:
-                            onResolved({ question: questionInDb, type: QuestionSaveResolveType.Ignore });
-                            break;
-                        case QuestionState.incorrect:
-                        case QuestionState.partiallycorrect:
-                            this.onStateIncorrectOrPartiallyCorrect(questionInDb, questionToSave, onResolved);
-                            break;
-                        default:
-                            onResolved({ question: questionToSave, type: QuestionSaveResolveType.Write });
-                    }
+                    let merger: DbQuestionMerger = new DbQuestionMerger();
+                    let questionMerged: Question = merger.merge(questionInDb, questionToSave);
+                    onResolved({ question: questionMerged, type: QuestionSaveResolveType.Merge });
                 })
                 .catch((reason) => reject(reason));
         });
-    }
-
-    private onStateIncorrectOrPartiallyCorrect(
-        questionInDb: Question,
-        questionToSave: Question,
-        onResolved: (status: QuestionSaveResolveStatus) => void
-    ) {
-        switch (questionToSave.answer.state) {
-            case QuestionState.incorrect:
-            case QuestionState.partiallycorrect:
-                let merger: DbQuestionMerger = new DbQuestionMerger();
-                let questionMerged: Question = merger.merge(questionInDb, questionToSave);
-                onResolved({ question: questionMerged, type: QuestionSaveResolveType.Merge });
-                break;
-            default:
-                onResolved({ question: questionToSave, type: QuestionSaveResolveType.Write });
-        }
     }
 }
