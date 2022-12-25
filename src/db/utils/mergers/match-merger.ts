@@ -1,5 +1,7 @@
+import type { QuestionState } from "~core/enums/question-state";
 import type { IAnswerMerger } from "~core/interfaces/answer-merger";
 import type { MatchAnswer } from "~core/models/answers/match-answer";
+import { maxQuestionState } from "~core/utils/question-state-utils";
 
 type MatchAnswerAnswer = {
     correctAnswer?: string;
@@ -13,6 +15,7 @@ type MatchAnswerAnswers = {
 export class MatchMerger implements IAnswerMerger {
     merge(answerInDb: MatchAnswer, answerToImport: MatchAnswer): MatchAnswer {
         let answers: MatchAnswerAnswers = {};
+        let newState: QuestionState = maxQuestionState(answerInDb.state, answerToImport.state);
 
         // copy answers from db
         Object.keys(answerInDb.answers).forEach((text) => {
@@ -47,7 +50,7 @@ export class MatchMerger implements IAnswerMerger {
 
         return {
             answers: answers,
-            state: answerToImport.state
+            state: newState
         };
     }
 }
