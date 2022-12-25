@@ -41,6 +41,20 @@ export class MultichoiceParser implements IAnswerParser {
             case QuestionGroup.correctIncorrect:
                 if (parseCorrect) {
                     answerLabels = que.querySelectorAll(".answer>[class^=r].correct>[data-region^=answer-label]>:last-child");
+
+                    // Try to parse feedback (ONLY FOR RADIO)
+                    let feedbackElement = que.querySelector(".feedback");
+                    if (feedbackElement && answerLabels.length == 0 && que.querySelector(".answer>[class^=r]>input[type=radio]")) {
+                        let index = feedbackElement.textContent.indexOf(": ");
+                        if (index > -1) {
+                            let potentiallyCorrectAnswer = feedbackElement.textContent.substring(index+1).trim() // Example: 'The correct answer is: Yellow'
+                            let allAnswers = que.querySelectorAll(".answer>[class^=r]>input[type=radio] + [data-region^=answer-label]>:last-child");
+                            let answers = Array.from(allAnswers).map((answer) => answer.textContent);
+                            if (answers.includes(potentiallyCorrectAnswer)) {
+                                return [potentiallyCorrectAnswer];
+                            }
+                        }
+                    }
                 } else {
                     answerLabels = que.querySelectorAll(".answer>[class^=r].incorrect>[data-region^=answer-label]>:last-child");
                 }
