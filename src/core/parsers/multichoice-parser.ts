@@ -48,11 +48,17 @@ export class MultichoiceParser implements IAnswerParser {
 
             case QuestionGroup.complete:
                 // If the group is complete, then we need to be sure that the question is correct/incorrect
-                if ((parseCorrect && state == QuestionState.correct) || (!parseCorrect && state == QuestionState.incorrect)) {
+                if (parseCorrect && state == QuestionState.correct) {
                     answerLabels = que.querySelectorAll(`
                     .answer>[class^=r]>input[type=radio]:checked + [data-region^=answer-label]>:last-child, 
                     .answer>[class^=r]>input[type=checkbox]:checked  + [data-region^=answer-label]>:last-child`);
-                } else {
+                }
+                // Parse incorrect only for radio (in checkbox we can't sure)
+                else if (!parseCorrect && state == QuestionState.incorrect) {
+                    answerLabels = que.querySelectorAll(`
+                    .answer>[class^=r]>input[type=radio]:checked + [data-region^=answer-label]>:last-child`);
+                }
+                else {
                     return [];
                 }
                 break;
