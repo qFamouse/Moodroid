@@ -16,7 +16,7 @@ export class QuestionSaveResolverFactory {
         [QuestionType.multianswer, () => new MultianswerQuestionSaveResolver()]
     ]);
 
-    static getQuestionSaver(questionType: QuestionType): IQuestionSaveResolver | undefined {
+    static getQuestionSaveResolver(questionType: QuestionType): IQuestionSaveResolver | undefined {
         let constructor: () => IQuestionSaveResolver = QuestionSaveResolverFactory.typeSaver.get(questionType);
 
         if (!constructor) return;
