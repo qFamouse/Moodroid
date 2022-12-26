@@ -6,4 +6,6 @@ export interface IAnswerer {
     adventure(que: HTMLElement, question: Question);
 
     hack(que: HTMLElement, question: Question);
+
+    roll(que: HTMLElement, question?: Question);
 }

@@ -1,3 +1,4 @@
+import { QuestionState } from "~core/enums/question-state";
 import type { IAnswerer } from "~core/interfaces/answerer";
 import type { MatchAnswer } from "~core/models/answers/match-answer";
 import type { Question } from "~core/models/question";
@@ -69,5 +70,30 @@ export class MatchAnswerer implements IAnswerer {
         };
 
         this.enumerator(que, question, correctAction);
+    }
+
+    roll(que: HTMLElement, question: Question) {
+        let matchAnswer = question?.answer as MatchAnswer;
+
+        if (matchAnswer && Object.keys(matchAnswer.answers).length > 0 && matchAnswer.state === QuestionState.correct) {
+            return this.hack(que, question);
+        }
+
+        let rows: NodeListOf<HTMLElement> = que.querySelectorAll("tbody>[class^=r]");
+        let optionsLength = rows[0]?.querySelectorAll(".control>select>option").length - 1; // -1 because we don't need the first option (its "Choose...")
+        let optionsIndexes = Array.from({ length: optionsLength }, (_, i) => i + 1); //=> [1, 2, 3, 4, ... optionLength]
+
+        while (optionsLength < rows.length) {
+            optionsIndexes.push(optionsIndexes[Math.floor(Math.random() * optionsIndexes.length)]);
+        }
+
+        // Shuffle
+        optionsIndexes = optionsIndexes.sort((a, b) => 0.5 - Math.random());
+
+        rows.forEach((row) => {
+            let options: NodeListOf<HTMLOptionElement> = row.querySelectorAll(".control>select>option");
+            let idx = optionsIndexes.pop();
+            options[idx].selected = true;
+        });
     }
 }

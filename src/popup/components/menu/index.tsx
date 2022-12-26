@@ -36,6 +36,7 @@ const selectOptions: ISelectOption[] = [
         { name: "Adventure mode", value: ExtensionMode.adventure, ico: "adventure" },
         { name: "Exam mode", value: ExtensionMode.exam, ico: "exam" },
         { name: "Hack mode", value: ExtensionMode.hack, ico: "hack" },
+        { name: "Roll mode", value: ExtensionMode.roll, ico: "roll" },
         { name: "Disabled", value:  ExtensionMode.disabled, ico: "disabled" }
     ]
 

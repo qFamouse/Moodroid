@@ -1,3 +1,4 @@
+import { QuestionState } from "~core/enums/question-state";
 import type { IAnswerer } from "~core/interfaces/answerer";
 import type { MultichoiceAnswer } from "~core/models/answers/multichoice-answer";
 import type { Question } from "~core/models/question";
@@ -70,10 +71,10 @@ export class MultichoiceAnswerer implements IAnswerer {
 
         // Create points
         let bellIcon: HTMLElement = document.querySelector(".icon.fa.fa-bell.fa-fw");
-        let correctPoint : HTMLDivElement = createStatusPoint();
+        let correctPoint: HTMLDivElement = createStatusPoint();
 
         let messageIcon: HTMLElement = document.querySelector(".icon.fa.fa-comment.fa-fw");
-        let incorrectPoint : HTMLDivElement = createStatusPoint();
+        let incorrectPoint: HTMLDivElement = createStatusPoint();
 
         if (bellIcon && messageIcon) {
             correctPoint.style.inset = incorrectPoint.style.inset = "0 0 0 0";
@@ -81,8 +82,7 @@ export class MultichoiceAnswerer implements IAnswerer {
             bellIcon.style.position = messageIcon.style.position = "relative";
             bellIcon.appendChild(correctPoint);
             messageIcon.appendChild(incorrectPoint);
-        }
-        else {
+        } else {
             correctPoint.style.bottom = incorrectPoint.style.bottom = "20px";
             correctPoint.style.left = incorrectPoint.style.right = "20px";
 
@@ -109,5 +109,31 @@ export class MultichoiceAnswerer implements IAnswerer {
         };
 
         this.enumerator(que, question, correctAction, incorrectAction);
+    }
+
+    roll(que: HTMLElement, question?: Question): void {
+        let answer = question?.answer as MultichoiceAnswer;
+
+        if (answer?.correctAnswers.length > 0 && answer?.state === QuestionState.correct) {
+            return this.hack(que, question);
+        }
+
+        let rows: NodeListOf<HTMLElement> = que.querySelectorAll(".answer>[class^=r]");
+        let isRadio = !!rows[0].querySelector("input[type=radio]");
+        let numberOfTicks = isRadio ? 1 : Math.floor(Math.random() * rows.length); // Math.floor(Math.random() * (max - min)) + min
+
+        let i = 0;
+        while (i < numberOfTicks) {
+            let randomRowIndex = Math.floor(Math.random() * rows.length);
+            let input: HTMLInputElement = rows[randomRowIndex].querySelector("input[type=radio], input[type=checkbox]");
+            let answerLabel: HTMLLabelElement = rows[randomRowIndex].querySelector("[data-region^=answer-label]>:last-child");
+
+            if (answer?.incorrectAnswers.includes(answerLabel.textContent)) {
+                continue;
+            }
+
+            input.checked = true;
+            i++;
+        }
     }
 }

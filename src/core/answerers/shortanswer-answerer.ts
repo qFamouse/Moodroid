@@ -35,4 +35,8 @@ export class ShortanswerAnswerer implements IAnswerer {
 
         ShortanswerAnswerer.handler(que, question, correctAction);
     }
+
+    roll(que: HTMLElement, question?: Question) {
+        return question ? this.hack : undefined;
+    }
 }

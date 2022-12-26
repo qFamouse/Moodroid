@@ -40,4 +40,8 @@ export class EssayAnswerer implements IAnswerer {
 
         EssayAnswerer.handler(que, question, correctAction);
     }
+
+    roll(que: HTMLElement, question?: Question) {
+        return question ? this.hack : undefined;
+    }
 }

@@ -35,4 +35,8 @@ export class MultianswerAnswerer implements IAnswerer {
 
         MultianswerAnswerer.handler(que, question, correctAction);
     }
+
+    roll(que: HTMLElement, question?: Question) {
+        return question ? this.hack : undefined;
+    }
 }
