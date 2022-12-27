@@ -3,7 +3,7 @@ import type { IQuestionSaveResolver } from "~core/interfaces/question-save-resol
 import type { Question } from "~core/models/question";
 import type { QuestionsImportStatus } from "~core/types/questions-import-status";
 
-import { QuestionSaveResolverFactory } from "./savers/question-save-resolver-factory";
+import { QuestionSaveResolverFactory } from "./saver-resolvers/question-save-resolver-factory";
 
 declare type Entity = {
     key: string;
@@ -63,7 +63,7 @@ export async function importQuestions(newQuestions: Map<string, Question>): Prom
         newQuestions.forEach((questionToImport, questionKey) => {
             enitityPromises.push(
                 new Promise((onFinished, reject) => {
-                    let resolver: IQuestionSaveResolver = QuestionSaveResolverFactory.getQuestionSaver(questionToImport.type);
+                    let resolver: IQuestionSaveResolver = QuestionSaveResolverFactory.getQuestionSaveResolver(questionToImport.type);
                     resolver
                         .resolve(questionToImport, questionKey)
                         .then((status) => {
@@ -99,7 +99,7 @@ export async function importQuestions(newQuestions: Map<string, Question>): Prom
 }
 
 export async function saveQuestion(questionKey: string, question: Question): Promise<void> {
-    let resolver: IQuestionSaveResolver = QuestionSaveResolverFactory.getQuestionSaver(question.type);
+    let resolver: IQuestionSaveResolver = QuestionSaveResolverFactory.getQuestionSaveResolver(question.type);
     return resolver.resolve(question, questionKey).then(
         (status) => {
             question = status.question;

@@ -13,15 +13,19 @@ export class MultichoiseQuestionSaveResolver implements IQuestionSaveResolver {
 
             retrieveQuestion(questionKey)
                 .then((questionInDb) => {
-                    if (!questionInDb) {
-                        onResolved({ question: questionToSave, type: QuestionSaveResolveType.Write });
-                        return;
-                    }
-                    let merger: DbQuestionMerger = new DbQuestionMerger();
-                    let questionMerged: Question = merger.merge(questionInDb, questionToSave);
-                    onResolved({ question: questionMerged, type: QuestionSaveResolveType.Merge });
+                    let status: QuestionSaveResolveStatus = this.getSaveResolveStatus(questionToSave, questionInDb);
+                    onResolved(status);
                 })
                 .catch((reason) => reject(reason));
         });
+    }
+
+    getSaveResolveStatus(questionToSave: Question, questionInDb: Question): QuestionSaveResolveStatus {
+        if (!questionInDb) {
+            return { question: questionToSave, type: QuestionSaveResolveType.Write };
+        }
+        let merger: DbQuestionMerger = new DbQuestionMerger();
+        let questionMerged: Question = merger.merge(questionInDb, questionToSave);
+        return { question: questionMerged, type: QuestionSaveResolveType.Merge };
     }
 }
