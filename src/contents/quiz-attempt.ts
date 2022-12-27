@@ -6,6 +6,7 @@ import { AccessValidator } from "~core/utils/access-validator";
 import { AnswerersFactory } from "~core/utils/answerers-factory";
 import { ExtensionApi } from "~core/utils/extension-api";
 import { generateQuestionKey } from "~core/utils/generate-question-key";
+import { parseQuestionType } from "~core/utils/parse/parse-question-type";
 import { QuestionDatabase } from "~db/question-database";
 
 export const config: PlasmoContentScript = {
@@ -28,12 +29,12 @@ window.addEventListener("load", async () => {
         let key: string = generateQuestionKey(que);
 
         QuestionDatabase.get(key).then((question) => {
-            if (!question) {
+            if (!question && currentExtensionMode !== ExtensionMode.roll) {
                 console.log("Not found", key);
                 return;
             }
 
-            let answerer: IAnswerer = AnswerersFactory.getAnswerer(question.type);
+            let answerer: IAnswerer = AnswerersFactory.getAnswerer(question?.type || parseQuestionType(que));
 
             if (!answerer) {
                 console.log("Answerer not found", question.type);
@@ -43,14 +44,13 @@ window.addEventListener("load", async () => {
             try {
                 switch (currentExtensionMode) {
                     case ExtensionMode.exam:
-                        answerer.exam(que, question);
-                        break;
+                        return question ? answerer.exam(que, question) : undefined;
                     case ExtensionMode.hack:
-                        answerer.hack(que, question);
-                        break;
+                        return question ? answerer.hack(que, question) : undefined;
                     case ExtensionMode.adventure:
-                        answerer.adventure(que, question);
-                        break;
+                        return question ? answerer.adventure(que, question) : undefined;
+                    case ExtensionMode.roll:
+                        return answerer.roll(que, question);
                     default:
                         console.warn("Unsupported extension mode", i);
                 }
