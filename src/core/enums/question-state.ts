@@ -4,6 +4,7 @@ export enum QuestionState {
     incorrect = "incorrect",
     notanswered = "notanswered",
     partiallycorrect = "partiallycorrect",
+    explicit = "explicit",
     // Question is not completed
     notyetanswered = "notyetanswered",
     answersaved = "answersaved"
