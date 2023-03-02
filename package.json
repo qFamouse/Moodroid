@@ -18,7 +18,14 @@
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",
-    "test": "jest"
+    "test": "jest",
+    "obfuscate": "npm run obfuscate:background && npm run obfuscate:popup && npm run obfuscate:attempt && npm run obfuscate:review && npm run obfuscate:summary && npm run obfuscate:view",
+    "obfuscate:background": "javascript-obfuscator build/chrome-mv3-prod/background.23452572.js --output build/obfuscated --options-preset default",
+    "obfuscate:popup": "javascript-obfuscator build/chrome-mv3-prod/popup.730d4668.js --output build/obfuscated --options-preset default",
+    "obfuscate:attempt": "javascript-obfuscator build/chrome-mv3-prod/quiz-attempt.d9c5fa5c.js --output build/obfuscated --options-preset high-obfuscation",
+    "obfuscate:review": "javascript-obfuscator build/chrome-mv3-prod/quiz-review.e7f59802.js --output build/obfuscated --options-preset high-obfuscation",
+    "obfuscate:summary": "javascript-obfuscator build/chrome-mv3-prod/quiz-summary.ed5f5e7d.js --output build/obfuscated --options-preset high-obfuscation",
+    "obfuscate:view": "javascript-obfuscator build/chrome-mv3-prod/quiz-view.6d6cd66d.js --output build/obfuscated --options-preset high-obfuscation"
   },
   "dependencies": {
     "crypto-js": "^4.1.1",
@@ -34,6 +41,7 @@
     "@types/node": "18.6.4",
     "@types/react": "18.0.17",
     "@types/react-dom": "18.0.6",
+    "javascript-obfuscator": "^4.0.0",
     "jest-environment-jsdom": "^29.0.2",
     "jest-webextension-mock": "^3.7.22",
     "prettier": "2.8.1",
