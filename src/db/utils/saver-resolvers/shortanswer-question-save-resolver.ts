@@ -26,18 +26,27 @@ export class ShortanswerQuestionSaveResolver implements IQuestionSaveResolver {
         }
 
         switch (questionInDb.answer.state) {
+            case QuestionState.partiallycorrect:
+                return this.ignoreAndWriteCorrect(questionInDb, questionToSave);
+            case QuestionState.explicit:
+                return this.writeAndIgnoreIncorrect(questionInDb, questionToSave);
+            case QuestionState.incorrect:
+                return this.writeAndIngoreExplicitOrIncorrect(questionInDb, questionToSave);
+            default:
+                return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
+        }
+    }
+
+    private ignoreAndWriteCorrect(questionInDb: Question, questionToSave: Question): QuestionSaveResolveStatus {
+        switch (questionToSave.answer.state) {
             case QuestionState.correct:
-                return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
-            case QuestionState.incorrect:
-                return this.onStateIncorrect(questionInDb, questionToSave);
-            case QuestionState.partiallycorrect:
-                return this.onStatePartiallyCorrect(questionInDb, questionToSave);
-            default:
                 return { question: questionToSave, type: QuestionSaveResolveType.Write };
+            default:
+                return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
         }
     }
 
-    private onStateIncorrect(questionInDb: Question, questionToSave: Question): QuestionSaveResolveStatus {
+    private writeAndIgnoreIncorrect(questionInDb: Question, questionToSave: Question): QuestionSaveResolveStatus {
         switch (questionToSave.answer.state) {
             case QuestionState.incorrect:
                 return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
@@ -46,9 +55,9 @@ export class ShortanswerQuestionSaveResolver implements IQuestionSaveResolver {
         }
     }
 
-    private onStatePartiallyCorrect(questionInDb: Question, questionToSave: Question): QuestionSaveResolveStatus {
+    private writeAndIngoreExplicitOrIncorrect(questionInDb: Question, questionToSave: Question): QuestionSaveResolveStatus {
         switch (questionToSave.answer.state) {
-            case QuestionState.partiallycorrect:
+            case QuestionState.explicit:
             case QuestionState.incorrect:
                 return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
             default:

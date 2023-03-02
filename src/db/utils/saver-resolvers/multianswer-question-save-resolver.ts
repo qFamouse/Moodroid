@@ -27,24 +27,33 @@ export class MultianswerQuestionSaveResolver implements IQuestionSaveResolver {
         }
 
         switch (questionInDb.answer.state) {
-            case QuestionState.correct:
-                return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
-            case QuestionState.incorrect:
             case QuestionState.partiallycorrect:
-                return this.onStateIncorrectOrPartiallyCorrect(questionInDb, questionToSave);
+            case QuestionState.incorrect:
+                return this.ignoreAndWriteCorrectAndMergePartiallyCorrect(questionInDb, questionToSave);
+            case QuestionState.explicit:
+                return this.writeAndIgnoreIncorrect(questionInDb, questionToSave);
             default:
-                return { question: questionToSave, type: QuestionSaveResolveType.Write };
+                return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
         }
     }
 
-    private onStateIncorrectOrPartiallyCorrect(questionInDb: Question, questionToSave: Question): QuestionSaveResolveStatus {
+    private ignoreAndWriteCorrectAndMergePartiallyCorrect(questionInDb: Question, questionToSave: Question): QuestionSaveResolveStatus {
         switch (questionToSave.answer.state) {
-            case QuestionState.incorrect:
-                return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
+            case QuestionState.correct:
+                return { question: questionToSave, type: QuestionSaveResolveType.Write };
             case QuestionState.partiallycorrect:
                 let merger: DbQuestionMerger = new DbQuestionMerger();
                 let questionMerged: Question = merger.merge(questionInDb, questionToSave);
                 return { question: questionMerged, type: QuestionSaveResolveType.Merge };
+            default:
+                return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
+        }
+    }
+
+    private writeAndIgnoreIncorrect(questionInDb: Question, questionToSave: Question): QuestionSaveResolveStatus {
+        switch (questionToSave.answer.state) {
+            case QuestionState.incorrect:
+                return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
             default:
                 return { question: questionToSave, type: QuestionSaveResolveType.Write };
         }
