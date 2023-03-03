@@ -5,6 +5,7 @@ import type { QuestionSaveResolveStatus } from "~core/types/question-save-resolv
 
 import { retrieveQuestion } from "../indexeddb";
 import { DbQuestionMerger } from "../mergers/db-question-merger";
+import { QuestionState } from "~core/enums/question-state";
 
 export class MultichoiseQuestionSaveResolver implements IQuestionSaveResolver {
     resolve(questionToSave: Question, questionKey: string): Promise<QuestionSaveResolveStatus> {
@@ -24,8 +25,31 @@ export class MultichoiseQuestionSaveResolver implements IQuestionSaveResolver {
         if (!questionInDb) {
             return { question: questionToSave, type: QuestionSaveResolveType.Write };
         }
-        let merger: DbQuestionMerger = new DbQuestionMerger();
-        let questionMerged: Question = merger.merge(questionInDb, questionToSave);
-        return { question: questionMerged, type: QuestionSaveResolveType.Merge };
+        switch (questionInDb.answer.state) {
+            case QuestionState.explicit:
+                return this.writeAndIgnoreIncorrect(questionInDb, questionToSave);
+            default:
+                return this.mergeAndIgnoreExplicit(questionInDb, questionToSave);
+        }
+    }
+
+    private mergeAndIgnoreExplicit(questionInDb: Question, questionToSave: Question): QuestionSaveResolveStatus {
+        switch (questionToSave.answer.state) {
+            case QuestionState.explicit:
+                return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
+            default:
+                let merger: DbQuestionMerger = new DbQuestionMerger();
+                let questionMerged: Question = merger.merge(questionInDb, questionToSave);
+                return { question: questionMerged, type: QuestionSaveResolveType.Merge };
+        }
+    }
+
+    private writeAndIgnoreIncorrect(questionInDb: Question, questionToSave: Question): QuestionSaveResolveStatus {
+        switch (questionToSave.answer.state) {
+            case QuestionState.incorrect:
+                return { question: questionInDb, type: QuestionSaveResolveType.Ignore };
+            default:
+                return { question: questionToSave, type: QuestionSaveResolveType.Write };
+        }
     }
 }
