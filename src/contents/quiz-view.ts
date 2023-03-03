@@ -1,6 +1,7 @@
 import type { PlasmoContentScript } from "plasmo";
 
 import { HEADER_VALUES } from "~core/constants/attempt-header-values";
+import { QuestionSaveResolveType } from "~core/enums/question-save-resolve-type";
 import { QuestionState } from "~core/enums/question-state";
 import { SummaryHeader } from "~core/enums/summary-header";
 import type { Attempt } from "~core/models/attempt";
@@ -12,6 +13,7 @@ import { generateQuestionKey } from "~core/utils/generate-question-key";
 import { generateShareText } from "~core/utils/generate-share-text";
 import { parseSummaryRow } from "~core/utils/parse/parse-summary-row";
 import { replacer } from "~db/question-database";
+import { QuestionSaveResolverFactory } from "~db/utils/saver-resolvers/question-save-resolver-factory";
 import { download } from "~popup/utils/download";
 
 export const config: PlasmoContentScript = {
@@ -91,7 +93,16 @@ async function parseQuestionsByUrl(url: URL, questions: Map<string, Question> = 
 
                 let key = generateQuestionKey(que);
 
-                questions.set(key, question);
+                if (questions.has(key)) {
+                    let resolver = QuestionSaveResolverFactory.getQuestionSaveResolver(question.type);
+                    let status = resolver.getSaveResolveStatus(question, questions.get(key));
+
+                    if (status.type != QuestionSaveResolveType.Ignore) {
+                        questions.set(key, status.question);
+                    }
+                } else {
+                    questions.set(key, question);
+                }
             } catch (e) {
                 console.warn(e, i + 1);
             }
@@ -131,7 +142,7 @@ function createShareAnchor(allAttempts: Array<Attempt>, tag: string, discipline:
             let median = calculateMedian(grades);
 
             let percentage = (median / maxScore) * 100;
-            download(JSON.stringify(questions, replacer),`${isNaN(percentage) ? "database" : percentage}.json`, "application/json");
+            download(JSON.stringify(questions, replacer), `${isNaN(percentage) ? "database" : percentage}.json`, "application/json");
         } else {
             let notPermittedAttempts = allAttempts.filter((a) => !a.review.isPermitted).map((a) => a.grade ?? a.mark ?? 0);
             let median = calculateMedian(notPermittedAttempts);
