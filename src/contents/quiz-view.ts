@@ -131,7 +131,7 @@ function createShareAnchor(allAttempts: Array<Attempt>, tag: string, discipline:
             let median = calculateMedian(grades);
 
             let percentage = (median / maxScore) * 100;
-            download(JSON.stringify(questions, replacer), `${`${percentage}%` || "database"}.json`, "application/json");
+            download(JSON.stringify(questions, replacer),`${isNaN(percentage) ? "database" : percentage}.json`, "application/json");
         } else {
             let notPermittedAttempts = allAttempts.filter((a) => !a.review.isPermitted).map((a) => a.grade ?? a.mark ?? 0);
             let median = calculateMedian(notPermittedAttempts);
