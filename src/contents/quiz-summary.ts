@@ -1,5 +1,6 @@
 import type { PlasmoContentScript } from "plasmo";
 
+import { QuestionSaveResolveType } from "~core/enums/question-save-resolve-type";
 import { QuestionState } from "~core/enums/question-state";
 import type { QuestionType } from "~core/enums/question-type";
 import type { IAnswer } from "~core/interfaces/answer";
@@ -11,7 +12,9 @@ import { generateQuestionKey } from "~core/utils/generate-question-key";
 import { parseQuestionState } from "~core/utils/parse/parse-question-state";
 import { parseQuestionText } from "~core/utils/parse/parse-question-text";
 import { parseQuestionType } from "~core/utils/parse/parse-question-type";
-import { QuestionDatabase } from "~db/question-database";
+import { replacer } from "~db/question-database";
+import { QuestionSaveResolverFactory } from "~db/utils/saver-resolvers/question-save-resolver-factory";
+import { download } from "~popup/utils/download";
 
 export const config: PlasmoContentScript = {
     matches: ["*://newsdo.vsu.by/mod/quiz/summary.php*"]
@@ -56,6 +59,8 @@ async function explicitParsing(): Promise<number> {
     let successCount: number = 0;
     let i = 0;
 
+    let questions = new Map<string, Question>();
+
     while (i < summaries.length) {
         if (!summaries[i].classList.contains(QuestionState.answersaved)) {
             i++;
@@ -86,7 +91,7 @@ async function explicitParsing(): Promise<number> {
                     try {
                         type = parseQuestionType(ques[k]);
                         text = parseQuestionText(ques[k]);
-                        answer = AnswerParserFactory.getAnswerParser(type)?.forceParse(ques[k], QuestionState.partiallycorrect);
+                        answer = AnswerParserFactory.getAnswerParser(type)?.forceParse(ques[k], QuestionState.explicit);
                     } catch (e) {
                         console.warn(e, summaries[i]);
                     }
@@ -96,7 +101,18 @@ async function explicitParsing(): Promise<number> {
                         console.log("Parsed question", question);
 
                         let key = generateQuestionKey(ques[k]);
-                        QuestionDatabase.add(key, question);
+
+                        if (questions.has(key)) {
+                            let resolver = QuestionSaveResolverFactory.getQuestionSaveResolver(question.type);
+                            let status = resolver.getSaveResolveStatus(question, questions.get(key));
+
+                            if (status.type != QuestionSaveResolveType.Ignore) {
+                                questions.set(key, status.question);
+                            }
+                        } else {
+                            questions.set(key, question);
+                        }
+
                         td.textContent += " ✅";
                         successCount++;
                     }
@@ -104,6 +120,8 @@ async function explicitParsing(): Promise<number> {
             }
         }
     }
+
+    download(JSON.stringify(questions, replacer), "database.json", "application/json");
 
     return successCount;
 }
