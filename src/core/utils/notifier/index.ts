@@ -4,35 +4,44 @@ import type { Notification } from "~core/types/notification";
 import { appendStyles } from "./append-styles";
 import type { Styles } from "./style-type";
 
-const basicNotificationStyles: Styles = {
-    position: "absolute",
+const basicNotificationStyles = {
+    position: "fixed",
     margin: "0 auto",
-    top: "25px",
-    padding: "15px",
+    width: "fit-content",
+    left: "0",
+    right: "0",
+    top: "10%",
+    padding: "5px 15px",
+    borderRadius: "10px",
     fontSize: "1.2rem",
     textAlign: "center",
     visibility: "1",
     opacity: "1",
     transition: "opacity 0.2s ease"
-};
+} as const;
 
+type AvailableStyles = Omit<Styles, keyof typeof basicNotificationStyles>;
+
+//TODO: separate class for drawing notifications?
 export class Notifier {
-    static notificationStyles = new Map<NotificationType, Styles>([
-        [NotificationType.info, { fontSize: "2rem", background: "blue" }],
-        [NotificationType.warn, { fontSize: "2rem", background: "yellow" }],
-        [NotificationType.error, { fontSize: "2rem", background: "red" }]
+    static notificationStyles = new Map<NotificationType, AvailableStyles>([
+        [NotificationType.info, { background: "blue" }],
+        [NotificationType.warn, { background: "yellow" }],
+        [NotificationType.error, { background: "red" }]
     ]);
 
-    static showMessage(notification: Notification, element: Element = document.body, delay: number = 1000) {
+    static showMessage(notification: Notification, delay: number = 1000, element: Element = document.body) {
         const { message, type, cause } = notification;
-        const errorElement = document.createElement("div");
-        appendStyles(errorElement, this.notificationStyles.get(type));
-        appendStyles(errorElement, basicNotificationStyles);
-        element.appendChild(errorElement);
+        const notifiactionElement = document.createElement("div");
+        notifiactionElement.textContent = message;
+
+        appendStyles(notifiactionElement, this.notificationStyles.get(type));
+        appendStyles(notifiactionElement, basicNotificationStyles);
+        element.appendChild(notifiactionElement);
         setTimeout(() => {
-            errorElement.style.visibility = "0";
-            errorElement.style.opacity = "0";
-            errorElement.remove();
+            notifiactionElement.style.visibility = "0";
+            notifiactionElement.style.opacity = "0";
+            notifiactionElement.remove();
         }, delay);
     }
 }
