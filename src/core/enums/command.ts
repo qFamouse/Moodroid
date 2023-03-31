@@ -4,5 +4,6 @@ export enum Command {
     Add = "add",
     Get = "get",
     Size = "size",
-    Clear = "clear"
+    Clear = "clear",
+    Notification = "notification"
 }
