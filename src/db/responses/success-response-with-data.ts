@@ -1,7 +1,7 @@
 import { SuccessResponse } from "./success-response";
 
-export class SuccessResponseWithData extends SuccessResponse {
-    constructor(readonly data: any) {
+export class SuccessResponseWithData<T> extends SuccessResponse {
+    constructor(public readonly data: T) {
         super();
     }
 }

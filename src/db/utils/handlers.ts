@@ -3,6 +3,7 @@ import type { Question } from "~core/models/question";
 import type { AddRequest } from "~db/requests/add-request";
 import type { GetRequest } from "~db/requests/get-request";
 import type { ImportRequest } from "~db/requests/import-request";
+import type { NotificationRequest } from "~db/requests/notification-request";
 import { FailedResponse } from "~db/responses/failed-response";
 import { SuccessResponse } from "~db/responses/success-response";
 import { SuccessResponseWithData } from "~db/responses/success-response-with-data";
@@ -98,6 +99,17 @@ export function handleClear(request: any, sender: chrome.runtime.MessageSender, 
         removeAllQuestions().then(() => {
             sendResponse(new SuccessResponse());
         });
+        return true;
+    }
+}
+/**
+ * Handle request: {command: Command.Notification, data: chrome.runtime.NotificationOptions}
+ */
+export function handleNotification(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
+    if (request.command === Command.Notification) {
+        const notificationOptions = (request as NotificationRequest).data;
+        chrome.notifications.create("", notificationOptions, () => sendResponse(new SuccessResponse()));
+
         return true;
     }
 }
