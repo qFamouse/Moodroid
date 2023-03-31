@@ -8,7 +8,7 @@ import { NotificationRequest } from "~db/requests/notification-request";
 import NotificationContainer from "~popup/components/notification-container";
 
 export class Notifier {
-    static defaultDelay = 1000;
+    static defaultDelay = 3000;
     static messageBlock: HTMLDivElement = document.createElement("div");
     private static root: ReactDOM.Root;
     private static notifications: Array<Notification & { ttl?: number; id?: number }> = [];
@@ -49,6 +49,16 @@ export class Notifier {
         };
 
         chrome.runtime.sendMessage(new NotificationRequest(options));
+    }
+
+    static showUrgent(message: string, data: { title?: string; type: NotificationType; delay?: number; element?: Element }) {
+        const { title, type, delay, element } = data;
+
+        if (document.visibilityState === "hidden") {
+            this.showBrowserNotification(message, title);
+        } else {
+            this.showNotification({ message, type }, delay, element);
+        }
     }
 
     private static renderNotifications() {

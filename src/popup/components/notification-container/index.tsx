@@ -20,7 +20,7 @@ const NotificationContainer = (props: INotificationContainerProps) => {
 
     return (
         <div className={styles["notification-container"]}>
-            {notifications.map((notification, index) => (
+            {notifications.map((notification) => (
                 <NotificationComponent key={notification.id} {...notification} />
             ))}
         </div>

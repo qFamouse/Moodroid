@@ -18,7 +18,7 @@ const defaultProps: INotificationOptionalProps = {};
 interface INotificationProps extends INotificationRequiredProps, INotificationOptionalProps {}
 //TODO: find better solution for unmount animation
 const Notification = (props: INotificationProps) => {
-    const { message, type, ttl } = props;
+    const { message, type, ttl = 3000 } = props;
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
